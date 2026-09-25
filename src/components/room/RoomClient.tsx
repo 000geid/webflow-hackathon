@@ -175,7 +175,6 @@ export function RoomClient({ code, token, onExit, notify, onFinished }: RoomClie
         score={view.score}
         roundIndex={round.index}
         totalRounds={view.totalRounds}
-        results={view.roundResults.filter((result): result is boolean => result !== null)}
         isPaused={round.isYourTurn}
         isLocked={busy || view.status !== "playing" || round.hasAttempted || (phase !== "revealing" && !round.isYourTurn)}
         canResume={false}
