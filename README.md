@@ -1,34 +1,47 @@
-# Pixel Rush
+# Pixel Rush AI
 
-Minijuego en Next.js 15 + TypeScript + Tailwind v4, pensado para desplegar en Webflow Cloud.
+Base de una app Next.js para desplegar en Webflow Cloud. La interfaz de Gabi ya está en el repo, pero todavía muestra una ronda de prueba y no está conectada a los endpoints.
 
-## Correr en local
+## Estado
+
+- Sitio Webflow `Pixel Rush` y colección CMS `Challenges` creados. Esquema e IDs en [docs/webflow-cms.md](docs/webflow-cms.md).
+- Endpoint `GET /api/health` disponible.
+- Reglas de puntaje y motor de rondas preparados en `src/lib/game/`.
+- Cliente de lectura de Webflow Data API preparado en `src/lib/server/webflow.ts`; requiere un Site Token. Aún no está conectado a una ruta de juego.
+- Binding de SQLite y migración inicial preparados para Webflow Cloud. La persistencia de partidas todavía no está conectada a los endpoints.
+
+## Interfaz
+
+- Tailwind CSS v4. Los colores de marca están como tokens en `src/app/globals.css` (`bg-canvas`, `bg-brand`, `bg-success`).
+- `src/components/game/`: `GameStage` y sus piezas (`GameHeader`, `GameImage`, `GuessButton`, `OptionsGrid`, `OptionButton`). Solo pintan lo que reciben por props.
+- `src/components/ui/`: piezas genéricas (`Badge`).
+- `src/lib/ui/`: helpers de la interfaz (niveles de blur/zoom, estado visual de cada opción).
+- `src/mocks/`: ronda de prueba mientras no hay endpoints.
+- Las props de `GameStage` siguen los nombres de `GameView`. El mapeo está comentado en `GameStage.tsx`.
+
+## Desarrollo
+
+Requiere Node.js 22 o posterior y npm.
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-Abre http://localhost:3000
+Para las verificaciones locales:
 
-## Estructura
-
-```
-src/
-├── app/                  # Rutas de Next (layout, página, estilos globales)
-├── components/
-│   ├── game/             # Piezas del juego: GameStage, GameHeader, GameImage,
-│   │                     # GuessButton, OptionsGrid, OptionButton
-│   └── ui/               # Piezas genéricas reutilizables (Badge)
-├── lib/
-│   ├── cn.ts             # Helper para unir clases
-│   └── game/             # Lógica pura de la UI: niveles de blur/zoom, estado de opciones
-├── mocks/                # Datos de prueba mientras no hay servidor
-└── types/                # Tipos compartidos (GameRound, EffectLevel…)
+```bash
+npm run typecheck
+npm run lint
+npm test
+npm run build
 ```
 
-## Notas para Webflow Cloud
+Las variables esperadas figuran en `.env.example`. Guardar valores reales en `.env.local` o en los secretos del entorno de Webflow Cloud. No guardar el token en Git.
 
-- No definir `basePath` ni `assetPrefix` en `next.config.ts`: Webflow Cloud los pone al hacer el build.
-- Las rutas de API deben llevar `export const runtime = 'edge';` y usar `fetch` (nada de axios).
-- Los `fetch` del lado del cliente tienen que incluir el base path.
+## Próximos pasos
+
+1. Cargar cinco desafíos completos y activos en la colección `Challenges`.
+2. Crear un Site Token con permiso `cms:read` y configurarlo como `WEBFLOW_SITE_TOKEN` en Cloud.
+3. Conectar el lector de CMS y SQLite a los endpoints de partida.
+4. Integrar la interfaz de Gabi con esos endpoints y desplegar la app en Webflow Cloud.

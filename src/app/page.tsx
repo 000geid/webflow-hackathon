@@ -1,17 +1,18 @@
 import { GameStage } from "@/components/game";
 import { mockRound } from "@/mocks/game";
 
-// Por ahora la página muestra una ronda de prueba.
-// Cuando esté la lógica del servidor, estos datos vendrán de ahí.
-export default function HomePage() {
+// La UI todavía muestra una ronda de prueba. Cuando estén los endpoints de
+// partida, estos datos salen de GameView (ver GameStage.tsx).
+export default function Home() {
   return (
     <GameStage
-      round={mockRound}
+      imageUrl={mockRound.imageUrl}
+      category={mockRound.category}
+      choices={mockRound.choices}
       timeLeft={15}
       score={0}
       zoomLevel={4}
       blurLevel={5}
-      showOptions={false}
     />
   );
 }

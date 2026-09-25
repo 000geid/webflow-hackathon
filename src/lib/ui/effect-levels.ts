@@ -1,4 +1,5 @@
-import type { EffectLevel } from "@/types/game";
+/** Nivel visual de 0 (imagen nítida / sin zoom) a 7 (máximo efecto). */
+export type EffectLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 /*
  * Tailwind solo genera las clases que encuentra escritas completas en el código.

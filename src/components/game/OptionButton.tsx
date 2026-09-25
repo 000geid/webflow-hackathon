@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@/lib/cn";
-import type { OptionState } from "@/types/game";
+import { cn } from "@/lib/ui/cn";
+import type { OptionState } from "@/lib/ui/option-state";
 
 const CONTAINER: Record<OptionState, string> = {
   idle: "border-slate-200 bg-white text-slate-700 hover:border-brand hover:bg-blue-50",
