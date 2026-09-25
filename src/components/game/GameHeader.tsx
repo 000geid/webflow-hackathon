@@ -19,23 +19,23 @@ export function GameHeader({ timeLeft, score, roundIndex, totalRounds, results }
   const isLowTime = seconds <= LOW_TIME_THRESHOLD && seconds > 0;
 
   return (
-    <header className="mb-6 space-y-4">
+    <header className="mb-7 space-y-4">
       <ProgressBar totalRounds={totalRounds} roundIndex={roundIndex} results={results} />
 
       <div className="flex items-center justify-between gap-3">
-        <p className="text-xl leading-none font-black tracking-tight sm:text-2xl">
-          Pixel <span className="text-brand">Rush</span>
+        <p className="text-2xl leading-none font-black tracking-tight sm:text-3xl">
+          <span className="text-ink">Pixel</span> <span className="text-brand">Rush</span>
         </p>
 
         <div className="flex items-center gap-2" aria-live="polite">
           <Badge
-            tone={isLowTime ? "danger" : "brand"}
+            tone={isLowTime ? "danger" : "highlight"}
             label={`${seconds} segundos restantes`}
             icon={<ClockIcon className="h-5 w-5" />}
           >
             {seconds}s
           </Badge>
-          <Badge tone="gold" label={`${score} puntos`} icon={<StarIcon className="h-5 w-5 text-amber-400" />}>
+          <Badge tone="brand" label={`${score} puntos`} icon={<StarIcon className="h-5 w-5 text-highlight" />}>
             {score.toLocaleString("es-AR")}
           </Badge>
         </div>

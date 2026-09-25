@@ -14,9 +14,11 @@ export function StarRating({ stars }: { stars: Stars }) {
             key={n}
             viewBox="0 0 24 24"
             aria-hidden="true"
+            strokeWidth={1.75}
+            strokeLinejoin="round"
             className={cn(
-              "h-12 w-12 sm:h-14 sm:w-14",
-              filled ? "fill-amber-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.6)]" : "fill-slate-200",
+              "h-12 w-12 stroke-ink sm:h-14 sm:w-14",
+              filled ? "fill-highlight drop-shadow-[3px_3px_0_#020617]" : "fill-white",
             )}
             initial={{ scale: 0, rotate: -30 }}
             animate={{ scale: 1, rotate: 0 }}

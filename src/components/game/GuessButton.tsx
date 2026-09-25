@@ -10,9 +10,8 @@ interface GuessButtonProps {
 }
 
 /**
- * Botón arcade 3D. ADIVINAR frena el tiempo y muestra las opciones; REANUDAR vuelve a correr.
- * Al apretar baja 4px y pierde el borde inferior; `active:mb-1` compensa esos 4px
- * para que lo de abajo no salte.
+ * Botón principal brutalista. ADIVINAR frena el tiempo y muestra las opciones;
+ * REANUDAR vuelve a correr. Al apretar se "hunde" hacia la sombra.
  */
 export function GuessButton({ isPaused, disabled, onGuess, onResume }: GuessButtonProps) {
   return (
@@ -22,14 +21,13 @@ export function GuessButton({ isPaused, disabled, onGuess, onResume }: GuessButt
       disabled={disabled}
       aria-pressed={isPaused}
       className={cn(
-        "mt-8 w-full cursor-pointer rounded-2xl border-b-4 py-4 text-xl font-black tracking-[0.15em] text-white uppercase sm:py-5 sm:text-2xl",
-        "transition-[transform,translate,background-color,border-color,margin] duration-100",
-        "enabled:active:mb-1 enabled:active:translate-y-1 enabled:active:border-b-0",
-        "focus-visible:ring-4 focus-visible:outline-hidden",
-        "disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-400",
-        isPaused
-          ? "border-slate-950 bg-slate-800 hover:bg-slate-700 focus-visible:ring-slate-400/50"
-          : "border-brand-edge bg-brand hover:bg-[#3b74f0] focus-visible:ring-blue-400/50",
+        "mt-8 w-full cursor-pointer rounded-xl border-2 border-ink py-4 text-xl font-black tracking-[0.12em] uppercase shadow-hard sm:py-5 sm:text-2xl",
+        "transition-[translate,box-shadow,background-color] duration-100",
+        "enabled:hover:-translate-x-px enabled:hover:-translate-y-px enabled:hover:shadow-hard-lg",
+        "enabled:active:translate-x-[2px] enabled:active:translate-y-[2px] enabled:active:shadow-none",
+        "focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-brand",
+        "disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none",
+        isPaused ? "bg-highlight text-ink" : "bg-brand text-white",
       )}
     >
       {isPaused ? "Reanudar" : "Adivinar"}

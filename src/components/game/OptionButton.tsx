@@ -4,24 +4,24 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/ui/cn";
 import type { OptionState } from "@/lib/ui/option-state";
 
-/* Tarjeta táctil estilo Duolingo: borde de 2px y "labio" inferior de 4px. */
+/* Tarjeta brutalista: borde negro 2px + sombra dura. */
 const CARD: Record<OptionState, string> = {
-  idle: "border-slate-200 border-b-slate-300 bg-white text-slate-800 hover:border-blue-400 hover:border-b-blue-500 hover:bg-blue-50/50",
-  selected: "border-blue-400 border-b-blue-500 bg-blue-50 text-brand",
-  correct: "border-emerald-600 border-b-emerald-700 bg-emerald-500 text-white shadow-[0_0_28px_rgba(16,185,129,0.5)]",
-  wrong: "border-rose-600 border-b-rose-700 bg-rose-500 text-white",
-  revealed: "border-emerald-400 border-b-emerald-500 bg-emerald-50 text-emerald-700",
-  muted: "border-slate-200 border-b-slate-300 bg-white text-slate-400 opacity-50",
+  idle: "bg-white text-ink shadow-hard-sm enabled:hover:-translate-x-px enabled:hover:-translate-y-px enabled:hover:shadow-hard-brand",
+  selected: "bg-blue-100 text-ink shadow-hard-brand",
+  correct: "bg-emerald-500 text-white shadow-hard-sm",
+  wrong: "bg-rose-500 text-white shadow-hard-sm",
+  revealed: "bg-emerald-100 text-emerald-900 shadow-hard-sm",
+  muted: "bg-white text-slate-400 opacity-50 shadow-none",
 };
 
-/* Tecla con la letra: pequeña, con volumen. */
+/* Tecla con la letra: amarillo eléctrico. */
 const KEYCAP: Record<OptionState, string> = {
-  idle: "border-slate-300 border-b-slate-400 bg-slate-100 text-slate-600 group-hover:border-blue-300 group-hover:border-b-blue-400 group-hover:bg-white group-hover:text-brand",
-  selected: "border-blue-300 border-b-blue-400 bg-white text-brand",
-  correct: "border-white/40 bg-white/20 text-white",
-  wrong: "border-white/40 bg-white/20 text-white",
-  revealed: "border-emerald-300 border-b-emerald-400 bg-white text-emerald-600",
-  muted: "border-slate-200 bg-slate-50 text-slate-400",
+  idle: "bg-highlight text-ink",
+  selected: "bg-highlight text-ink",
+  correct: "bg-white text-emerald-700",
+  wrong: "bg-white text-rose-600",
+  revealed: "bg-emerald-400 text-ink",
+  muted: "bg-slate-100 text-slate-400",
 };
 
 interface OptionButtonProps {
@@ -45,11 +45,11 @@ export function OptionButton({ letter, label, state, disabled, onClick }: Option
         animate={isCorrect ? { scale: [1, 1.06, 0.98, 1] } : { scale: 1 }}
         transition={isCorrect ? { duration: 0.5, ease: "easeOut" } : { duration: 0.15 }}
         className={cn(
-          "group relative flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-2xl border-2 border-b-4 p-4 text-left",
-          "text-base font-extrabold sm:text-lg",
-          "transition-[background-color,border-color,color,box-shadow,translate,opacity] duration-150",
-          "enabled:active:translate-y-1 enabled:active:border-b-2",
-          "focus-visible:ring-4 focus-visible:ring-blue-400/40 focus-visible:outline-hidden",
+          "group relative flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-xl border-2 border-ink p-4 text-left",
+          "text-base font-extrabold tracking-tight sm:text-lg",
+          "transition-all duration-150",
+          "enabled:active:translate-x-[2px] enabled:active:translate-y-[2px] enabled:active:shadow-none",
+          "focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand",
           "disabled:cursor-not-allowed",
           CARD[state],
         )}
@@ -67,7 +67,7 @@ export function OptionButton({ letter, label, state, disabled, onClick }: Option
 
         <kbd
           className={cn(
-            "relative shrink-0 rounded-lg border border-b-2 px-2.5 py-1 font-sans text-xs font-bold transition-colors",
+            "relative shrink-0 rounded-md border border-ink px-2 py-0.5 font-sans text-xs font-black",
             KEYCAP[state],
           )}
         >

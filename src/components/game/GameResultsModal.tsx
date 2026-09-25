@@ -43,7 +43,7 @@ export function GameResultsModal({ open, score, maxScore, correctCount, totalRou
       {open && (
         <motion.div
           key="backdrop"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -52,7 +52,7 @@ export function GameResultsModal({ open, score, maxScore, correctCount, totalRou
             role="dialog"
             aria-modal="true"
             aria-labelledby="results-title"
-            className="w-full max-w-md rounded-3xl border-4 border-ink bg-white p-8 text-center shadow-[0_8px_0_0_#0f172a]"
+            className="w-full max-w-md rounded-2xl border-3 border-ink bg-white p-8 text-center shadow-hard-xl"
             initial={{ opacity: 0, scale: 0.9, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
@@ -63,19 +63,19 @@ export function GameResultsModal({ open, score, maxScore, correctCount, totalRou
             <h2 id="results-title" className="mt-5 text-2xl font-black tracking-tight sm:text-3xl">
               {TITLES[stars]}
             </h2>
-            <p className="mt-1 font-bold text-slate-500">Terminaste la partida</p>
+            <p className="mt-1 text-sm font-extrabold tracking-widest text-slate-500 uppercase">Terminaste la partida</p>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <div className="rounded-2xl border-2 border-b-4 border-blue-200 border-b-blue-300 bg-blue-50 px-4 py-3 shadow-[0_0_24px_rgba(37,99,235,0.25)]">
-                <p className="text-xs font-extrabold tracking-widest text-blue-500 uppercase">Puntaje</p>
-                <p className="text-3xl font-black text-brand tabular-nums">{score.toLocaleString("es-AR")}</p>
+              <div className="rounded-xl border-2 border-ink bg-brand px-4 py-3 text-white shadow-hard-sm">
+                <p className="text-xs font-black tracking-widest text-blue-100 uppercase">Puntaje</p>
+                <p className="text-3xl font-black tracking-tight tabular-nums">{score.toLocaleString("es-AR")}</p>
               </div>
-              <div className="rounded-2xl border-2 border-b-4 border-emerald-200 border-b-emerald-300 bg-emerald-50 px-4 py-3 shadow-[0_0_24px_rgba(16,185,129,0.25)]">
-                <p className="text-xs font-extrabold tracking-widest text-emerald-600 uppercase">Precisión</p>
-                <p className="text-3xl font-black text-emerald-600 tabular-nums">{accuracy}%</p>
+              <div className="rounded-xl border-2 border-ink bg-highlight px-4 py-3 text-ink shadow-hard-sm">
+                <p className="text-xs font-black tracking-widest text-ink/70 uppercase">Precisión</p>
+                <p className="text-3xl font-black tracking-tight tabular-nums">{accuracy}%</p>
               </div>
             </div>
-            <p className="mt-3 text-sm font-bold text-slate-500">
+            <p className="mt-4 text-sm font-bold text-slate-600">
               {correctCount} de {totalRounds} correctas
             </p>
 
@@ -83,7 +83,7 @@ export function GameResultsModal({ open, score, maxScore, correctCount, totalRou
               type="button"
               autoFocus
               onClick={onPlayAgain}
-              className="mt-7 w-full cursor-pointer rounded-2xl border-b-4 border-brand-edge bg-brand py-4 text-lg font-black tracking-[0.15em] text-white uppercase transition-[translate,background-color,border-color,margin] duration-100 hover:bg-[#3b74f0] focus-visible:ring-4 focus-visible:ring-blue-400/50 focus-visible:outline-hidden active:mb-1 active:translate-y-1 active:border-b-0"
+              className="mt-7 w-full cursor-pointer rounded-xl border-2 border-ink bg-brand py-4 text-lg font-black tracking-[0.12em] text-white uppercase shadow-hard transition-[translate,box-shadow] duration-100 hover:-translate-x-px hover:-translate-y-px hover:shadow-hard-lg focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-brand active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
             >
               Jugar de nuevo
             </button>

@@ -30,10 +30,10 @@ export function CardDeck({ cardKey, roundIndex, totalRounds, children }: CardDec
     <div className="relative mx-auto w-full">
       {/* Cartas de fondo (decorativas) */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 -translate-x-[9%] translate-y-2 scale-90 -rotate-6 opacity-70">
-          <div className="h-full w-full rounded-[32px] border-4 border-yellow-200 bg-rose-200 shadow-xl shadow-slate-300/60" />
+        <div className="absolute inset-0 -translate-x-[9%] translate-y-2 scale-90 -rotate-6">
+          <div className="h-full w-full rounded-2xl border-3 border-ink bg-highlight shadow-hard-lg" />
         </div>
-        <div className="absolute inset-0 translate-x-[9%] translate-y-2 scale-90 rotate-6 opacity-80">
+        <div className="absolute inset-0 translate-x-[9%] translate-y-2 scale-90 rotate-6">
           <CardBack />
         </div>
       </div>
@@ -46,11 +46,19 @@ export function CardDeck({ cardKey, roundIndex, totalRounds, children }: CardDec
           animate={CENTER}
           exit={EXIT}
           transition={SPRING}
-          className="relative rounded-[32px] border-4 border-yellow-200 bg-white p-3 shadow-2xl shadow-slate-300/80 sm:p-4"
+          className="relative rounded-2xl border-3 border-ink bg-white p-3 shadow-hard-lg sm:p-4"
         >
-          <p className="px-1 pb-2.5 text-xs font-black tracking-widest text-slate-400 uppercase sm:pb-3">
-            Ronda {roundIndex + 1} de {totalRounds}
-          </p>
+          <div className="flex items-center justify-between px-0.5 pb-3">
+            <p className="text-xs font-black tracking-widest text-ink uppercase">
+              Ronda {roundIndex + 1} de {totalRounds}
+            </p>
+            {/* Tres "píxeles" decorativos, estilo etiqueta suiza */}
+            <span aria-hidden="true" className="flex gap-1">
+              <span className="h-2.5 w-2.5 border-2 border-ink bg-brand" />
+              <span className="h-2.5 w-2.5 border-2 border-ink bg-highlight" />
+              <span className="h-2.5 w-2.5 border-2 border-ink bg-white" />
+            </span>
+          </div>
           {children}
         </motion.div>
       </AnimatePresence>

@@ -2,10 +2,10 @@ import { cn } from "@/lib/ui/cn";
 import { getProgressSegments, type SegmentState } from "@/lib/ui/progress";
 
 const SEGMENT: Record<SegmentState, string> = {
-  correct: "bg-success",
+  correct: "bg-emerald-400",
   wrong: "bg-rose-500",
   current: "bg-brand",
-  upcoming: "bg-slate-200",
+  upcoming: "bg-white",
 };
 
 interface ProgressBarProps {
@@ -14,6 +14,7 @@ interface ProgressBarProps {
   results: boolean[];
 }
 
+/** Barra segmentada: un bloque por ronda, con borde negro como en pixel art. */
 export function ProgressBar({ totalRounds, roundIndex, results }: ProgressBarProps) {
   const segments = getProgressSegments(totalRounds, roundIndex, results);
 
@@ -25,20 +26,17 @@ export function ProgressBar({ totalRounds, roundIndex, results }: ProgressBarPro
       aria-valuemax={totalRounds}
       aria-valuenow={roundIndex + 1}
       aria-valuetext={`Ronda ${roundIndex + 1} de ${totalRounds}`}
-      className="flex gap-1.5"
+      className="flex gap-2"
     >
       {segments.map((state, i) => (
-        <span key={i} className="h-3.5 flex-1 overflow-hidden rounded-full bg-slate-200">
-          <span
-            className={cn(
-              "block h-full rounded-full transition-all duration-500 ease-out",
-              SEGMENT[state],
-              // Brillo arriba, como en los juegos.
-              state !== "upcoming" && "shadow-[inset_0_-3px_0_rgba(0,0,0,0.15),inset_0_3px_0_rgba(255,255,255,0.35)]",
-              state === "upcoming" ? "w-0" : "w-full",
-            )}
-          />
-        </span>
+        <span
+          key={i}
+          className={cn(
+            "h-4 flex-1 rounded-sm border-2 border-ink transition-colors duration-300",
+            SEGMENT[state],
+            state === "current" && "shadow-hard-xs",
+          )}
+        />
       ))}
     </div>
   );
