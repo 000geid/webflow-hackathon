@@ -1,14 +1,18 @@
 # Pixel Rush AI
 
-Base de una app Next.js para desplegar en Webflow Cloud. La interfaz de Gabi ya está en el repo. Por ahora la página corre una partida de prueba en el navegador (`GameDemo`) y no está conectada a los endpoints.
+App Next.js para Webflow Cloud. La interfaz de Gabi ya está en el repositorio. Por ahora la página corre una partida de prueba en el navegador (`GameDemo`) y no está conectada a los endpoints de partidas.
 
-## Estado
+## Backend disponible
 
-- Sitio Webflow `Pixel Rush` y colección CMS `Challenges` creados. Esquema e IDs en [docs/webflow-cms.md](docs/webflow-cms.md).
-- Endpoint `GET /api/health` disponible.
-- Reglas de puntaje y motor de rondas preparados en `src/lib/game/`.
-- Cliente de lectura de Webflow Data API preparado en `src/lib/server/webflow.ts`; requiere un Site Token. Aún no está conectado a una ruta de juego.
-- Binding de SQLite y migración inicial preparados para Webflow Cloud. La persistencia de partidas todavía no está conectada a los endpoints.
+- `GET /api/health`.
+- `POST /api/games`: crear una partida de cinco rondas.
+- `GET /api/games/{gameId}`: recuperar estado y expirar rondas vencidas.
+- `POST /api/games/{gameId}/actions`: iniciar, pausar, responder y expirar.
+- Persistencia SQLite mediante binding `DB`, token por partida y control de concurrencia.
+- Modo `fixture` local y modo `webflow` con validación de desafíos publicados del CMS.
+
+Contrato, ejemplos y errores: [docs/backend-api.md](docs/backend-api.md).
+Esquema del CMS: [docs/webflow-cms.md](docs/webflow-cms.md).
 
 ## Interfaz
 
@@ -22,27 +26,28 @@ Base de una app Next.js para desplegar en Webflow Cloud. La interfaz de Gabi ya 
 
 ## Desarrollo
 
-Requiere Node.js 22 o posterior y npm.
+Node.js 22 o posterior y npm:
 
 ```bash
 npm ci
+npm run db:migrate:local
 npm run dev
 ```
 
-Para las verificaciones locales:
+Verificaciones:
 
 ```bash
 npm run typecheck
 npm run lint
 npm test
+npm run test:api # requiere npm run dev; crea partidas de prueba
 npm run build
 ```
 
-Las variables esperadas figuran en `.env.example`. Guardar valores reales en `.env.local` o en los secretos del entorno de Webflow Cloud. No guardar el token en Git.
+Variables en `.env.example`. Guardar valores reales en `.env.local` o secretos de Webflow Cloud. No guardar el token en Git. La conexión MCP no reemplaza el Site Token que necesita la app.
 
-## Próximos pasos
+## Pendiente
 
-1. Cargar cinco desafíos completos y activos en la colección `Challenges`.
-2. Crear un Site Token con permiso `cms:read` y configurarlo como `WEBFLOW_SITE_TOKEN` en Cloud.
-3. Conectar el lector de CMS y SQLite a los endpoints de partida.
-4. Integrar la interfaz de Gabi con esos endpoints y desplegar la app en Webflow Cloud.
+Los [cinco desafíos de memes y cultura dev](content/challenges-memes-dev.csv) están publicados en Webflow. Se comprobó una partida local de cinco rondas en modo `webflow` con 5000 puntos.
+
+Pendiente: integrar la interfaz con la API, configurar secretos y migraciones en Cloud, y agregar generación de distractores por IA y límites de uso antes de abrir al público.
