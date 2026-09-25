@@ -1,26 +1,32 @@
 import type { ReactNode } from "react";
 
+/** Marca: un "píxel" 2×2 con los cuatro neones del sistema. */
+export function LogoMark({ className = "h-7 w-7" }: { className?: string }) {
+  return (
+    <span aria-hidden="true" className={`grid shrink-0 grid-cols-2 gap-0.5 border-2 border-black bg-black p-0.5 ${className}`}>
+      <span className="bg-neon" />
+      <span className="bg-arcade" />
+      <span className="bg-cyan-400" />
+      <span className="bg-hot" />
+    </span>
+  );
+}
+
 export function Logo() {
   return (
-    <p className="flex items-center gap-2 text-xl leading-none font-black tracking-tight text-slate-950 sm:text-2xl">
-      {/* Marca: un "píxel" azul con esquina recortada */}
-      <span aria-hidden="true" className="grid h-6 w-6 grid-cols-2 gap-0.5 rounded-md bg-slate-950 p-1">
-        <span className="rounded-[2px] bg-blue-500" />
-        <span className="rounded-[2px] bg-white/25" />
-        <span className="rounded-[2px] bg-white/25" />
-        <span className="rounded-[2px] bg-blue-500" />
-      </span>
+    <p className="flex items-center gap-2.5 font-pixel text-base leading-none tracking-wide text-cream uppercase sm:text-lg">
+      <LogoMark />
       <span>
-        Pixel <span className="text-blue-600">Rush</span>
+        Pixel <span className="text-neon-bright">Rush</span>
       </span>
     </p>
   );
 }
 
-/** Barra superior en cápsula: borde grueso y sombra dura, logo a la izquierda y acciones a la derecha. */
+/** Barra superior: panel navy de esquinas duras con logo a la izquierda y acciones a la derecha. */
 export function TopCapsule({ children }: { children?: ReactNode }) {
   return (
-    <header className="flex items-center justify-between gap-3 rounded-full border-2 border-slate-950 bg-white py-1.5 pr-1.5 pl-4 shadow-[3px_3px_0px_0px_#020617]">
+    <header className="flex items-center justify-between gap-3 border-2 border-edge bg-panel py-1.5 pr-1.5 pl-3 shadow-pixel">
       <Logo />
       <div className="flex items-center gap-1.5">{children}</div>
     </header>

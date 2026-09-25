@@ -70,9 +70,9 @@ function startWaterfall(): () => void {
 
 function StatCapsule({ label, children, sub }: { label: string; children: ReactNode; sub?: string }) {
   return (
-    <div className="min-w-0 rounded-2xl bg-white/[0.06] px-4 py-3 ring-1 ring-white/10">
-      <dt className="font-mono text-[10px] tracking-wider text-slate-400 uppercase">{label}</dt>
-      <dd className="mt-1 truncate text-2xl leading-tight font-black tracking-tight tabular-nums">{children}</dd>
+    <div className="min-w-0 border-2 border-edge bg-panel px-3 py-3">
+      <dt className="font-pixel text-[9px] tracking-wider text-slate-500 uppercase">{label}</dt>
+      <dd className="mt-1.5 truncate font-pixel text-xl leading-tight text-emerald-400 tabular-nums [text-shadow:0_0_8px_rgb(52_211_153/0.5)]">{children}</dd>
       {sub && <p className="mt-0.5 truncate font-mono text-[11px] text-slate-400">{sub}</p>}
     </div>
   );
@@ -124,7 +124,7 @@ export function VictoryModal({
       {open && (
         <motion.div
           key="backdrop"
-          className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-md"
+          className="fixed inset-0 z-50 overflow-y-auto bg-crt/70 backdrop-blur-md"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -142,22 +142,22 @@ export function VictoryModal({
             >
               <motion.div onPointerMove={tilt} onPointerLeave={resetTilt} style={{ rotateX, rotateY }} className="[transform-style:preserve-3d]">
                 {/* Borde holográfico */}
-                <div className="rounded-[1.9rem] bg-[linear-gradient(115deg,#60a5fa,#a78bfa,#fcd34d,#34d399,#60a5fa)] bg-[length:300%_100%] p-[3px] shadow-[0_30px_80px_-20px_rgb(37_99_235/0.55)] motion-safe:animate-holo">
-                  <div className="relative isolate overflow-hidden rounded-[1.75rem] bg-slate-950 p-5 text-white">
+                <div className="bg-[linear-gradient(115deg,#10b981,#22d3ee,#f59e0b,#fb7185,#10b981)] bg-[length:300%_100%] p-[3px] shadow-[8px_8px_0px_0px_#000,0_0_60px_-10px_rgb(16_185_129/0.5)] motion-safe:animate-holo">
+                  <div className="relative isolate overflow-hidden bg-crt p-5 text-white">
                     {/* Luz ambiente + brillo que cruza la tarjeta */}
-                    <div aria-hidden="true" className="absolute -top-24 -right-16 -z-10 h-64 w-64 rounded-full bg-blue-600/40 blur-3xl" />
+                    <div aria-hidden="true" className="absolute -top-24 -right-16 -z-10 h-64 w-64 rounded-full bg-neon/25 blur-3xl" />
                     <div aria-hidden="true" className="absolute -bottom-24 -left-16 -z-10 h-56 w-56 rounded-full bg-amber-300/15 blur-3xl" />
                     <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_35%,rgb(255_255_255/0.12)_48%,transparent_60%)] bg-[length:250%_100%] motion-safe:animate-sheen" />
 
                     <div className="flex items-center justify-between font-mono text-[10px] tracking-[0.18em] uppercase">
-                      <span className="rounded-full bg-white/10 px-2.5 py-1 text-slate-300">{edition}</span>
-                      <span className={cn("rounded-full px-2.5 py-1 font-bold", title.rarity === "Legendaria" ? "bg-amber-300 text-slate-950" : "bg-white/10 text-slate-300")}>
+                      <span className="border border-edge px-2 py-1 text-slate-300">{edition}</span>
+                      <span className={cn("border px-2 py-1", title.rarity === "Legendaria" ? "border-black bg-arcade text-black" : "border-edge text-slate-300")}>
                         {title.rarity}
                       </span>
                     </div>
 
                     <div className="mt-5 flex items-center gap-3">
-                      <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-white/10 text-3xl ring-2 ring-amber-300/80" aria-hidden="true">
+                      <span className="grid h-14 w-14 shrink-0 place-items-center border-2 border-arcade bg-panel text-3xl shadow-pixel-sm" aria-hidden="true">
                         {player.avatar}
                       </span>
                       <div className="min-w-0">
@@ -170,10 +170,10 @@ export function VictoryModal({
 
                     <div className="mt-5">
                       <p className="text-3xl" aria-hidden="true">{title.emoji}</p>
-                      <h2 id="victory-title" className="mt-1 text-3xl leading-none font-black tracking-tight text-amber-300 uppercase sm:text-4xl">
+                      <h2 id="victory-title" className="mt-2 font-pixel text-2xl leading-tight text-arcade uppercase [text-shadow:0_0_14px_rgb(245_158_11/0.6)] sm:text-3xl">
                         {title.title}
                         {title.accent === "blue-dot" && (
-                          <span aria-hidden="true" className="ml-2 inline-block h-3 w-3 -translate-y-1 rounded-full bg-blue-500 shadow-[0_0_12px_rgb(59_130_246/0.9)]" />
+                          <span aria-hidden="true" className="ml-2 inline-block h-3 w-3 -translate-y-0.5 bg-cyan-400 shadow-[0_0_12px_rgb(34_211_238/0.9)]" />
                         )}
                       </h2>
                       <p className="mt-2 text-sm text-slate-400">{title.tagline}</p>
@@ -194,12 +194,12 @@ export function VictoryModal({
                         {formatSeconds(stats.averageMs)}
                       </StatCapsule>
                       <StatCapsule label="Categoría" sub={`${history.length} rondas`}>
-                        <span className="text-base">{stats.category}</span>
+                        <span className="font-sans text-sm font-bold text-slate-100 [text-shadow:none]">{stats.category}</span>
                       </StatCapsule>
                     </dl>
 
                     {ranking && (
-                      <ol className="mt-3 divide-y divide-white/10 rounded-2xl bg-white/[0.04] ring-1 ring-white/10" aria-label="Tabla final">
+                      <ol className="mt-3 divide-y-2 divide-edge border-2 border-edge bg-panel" aria-label="Tabla final">
                         {ranking.map((entry, index) => (
                           <li key={entry.id} className={cn("flex items-center gap-2.5 px-3 py-2", entry.isYou && "bg-white/[0.06]")}>
                             <span
@@ -229,7 +229,7 @@ export function VictoryModal({
                 <PillButton size="lg" autoFocus onClick={onPlayAgain} disabled={playAgainDisabled} className="w-full">
                   {playAgainLabel}
                 </PillButton>
-                <PillButton variant="light" size="md" onClick={() => void share()} className="w-full">
+                <PillButton variant="ghost" size="md" onClick={() => void share()} className="w-full">
                   Desafiar a un amigo
                 </PillButton>
                 {onExit && (

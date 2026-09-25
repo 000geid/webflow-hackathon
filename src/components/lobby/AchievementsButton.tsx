@@ -21,16 +21,16 @@ export function AchievementsButton({ unlocked, total, onClick }: AchievementsBut
       type="button"
       onClick={onClick}
       aria-label={`Logros: ${unlocked} de ${total} desbloqueados`}
-      className="group flex h-10 cursor-pointer items-center gap-2.5 rounded-full border-2 border-slate-950 bg-white py-1 pr-1 pl-3 shadow-[2px_2px_0_0_#020617] transition-[translate,box-shadow] duration-100 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 active:translate-y-0.5 active:shadow-none"
+      className="group flex h-10 cursor-pointer items-center gap-2.5 border-2 border-edge-soft bg-crt py-1 pr-1 pl-2.5 shadow-pixel-sm transition-[translate,box-shadow,border-color] duration-100 hover:border-arcade focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neon-bright active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
     >
-      <TrophyIcon className="h-4 w-4 text-slate-950" />
+      <TrophyIcon className="h-4 w-4 text-arcade" />
       <span className="hidden flex-col items-start gap-1 sm:flex">
-        <span className="text-[11px] leading-none font-extrabold tracking-wider text-slate-950 uppercase">Logros</span>
-        <span className="h-1 w-14 overflow-hidden rounded-full bg-slate-200">
-          <span className="block h-full rounded-full bg-blue-600 transition-[width] duration-500" style={{ width: `${percent}%` }} />
+        <span className="font-pixel text-[10px] leading-none tracking-wider text-slate-200 uppercase">Logros</span>
+        <span className="h-1.5 w-14 overflow-hidden bg-edge">
+          <span className="block h-full bg-neon transition-[width] duration-500" style={{ width: `${percent}%` }} />
         </span>
       </span>
-      <span className="rounded-full bg-amber-300 px-2 py-1 font-mono text-[11px] leading-none font-bold text-slate-950 tabular-nums">
+      <span className="bg-arcade px-1.5 py-1 font-pixel text-[10px] leading-none text-black tabular-nums">
         {unlocked}/{total}
       </span>
     </button>

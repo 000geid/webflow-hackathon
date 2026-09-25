@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, type FormEvent, type ReactNode } from "react";
-import { LiveDemoCard } from "./LiveDemoCard";
+import { useState, type FormEvent } from "react";
 import { PillButton } from "@/components/ui/PillButton";
 import { TopCapsule } from "@/components/ui/TopCapsule";
 import { NAME_MAX_LENGTH } from "@/lib/game/avatars";
@@ -16,15 +15,6 @@ import type { CategoryChoice } from "@/lib/game/categories";
 const CODE_LENGTH = 5;
 /** Mismo alfabeto que el server: sin I, L, O, 0 ni 1. */
 const sanitizeCode = (value: string) => value.toUpperCase().replace(/[^A-HJKMNP-Z2-9]/g, "").slice(0, CODE_LENGTH);
-
-function MicroBadge({ children, live = false }: { children: ReactNode; live?: boolean }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-slate-950 bg-white px-2.5 py-1 font-mono text-[11px] font-semibold tracking-wider text-slate-950 uppercase">
-      {live && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-600" aria-hidden="true" />}
-      {children}
-    </span>
-  );
-}
 
 interface LobbyProps {
   profile: Profile;
@@ -74,40 +64,33 @@ export function Lobby({ profile, onProfileChange, category, onCategoryChange, de
       <section className="grid flex-1 grid-cols-[minmax(0,1fr)] content-center items-center gap-10 py-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,27rem)] lg:gap-16 lg:py-16">
         {/* Columna izquierda: la propuesta */}
         <div>
-          <div className="flex flex-wrap gap-2">
-            <MicroBadge live>En vivo</MicroBadge>
-            <MicroBadge>2–5 jugadores</MicroBadge>
-            <MicroBadge>5 rondas · 15 s</MicroBadge>
-          </div>
-
-          <h1 className="mt-6 text-5xl leading-[0.95] font-black tracking-tight text-slate-950 uppercase xl:text-6xl">
-            ¿Qué carajo es esta imagen?
+          <h1 className="font-pixel text-4xl leading-tight text-cream uppercase sm:text-5xl xl:text-6xl">
+            {/* Los asteriscos no se leen en voz alta: el lector de pantalla dice "censurado". */}
+            ¿Qué <span aria-hidden="true" className="text-arcade [text-shadow:0_0_18px_rgb(245_158_11/0.6)]">******</span>
+            <span className="sr-only">censurado</span> es esta imagen?!!
           </h1>
 
-          <p className="mt-5 max-w-md text-lg font-medium text-slate-700">
+          <p className="mt-6 max-w-md text-lg text-slate-400">
             Frená el reloj antes que tus amigos y demostrá quién manda.
           </p>
-
-          <div className="mt-8 max-w-xl">
-            <LiveDemoCard />
-          </div>
+          {/* La demo en vivo (LiveDemoCard) queda fuera por ahora para mantener el foco. */}
         </div>
 
         {/* Columna derecha: entrar a jugar */}
         <form
           onSubmit={create}
           noValidate
-          className="w-full rounded-[2rem] border-3 border-slate-950 bg-white p-4 shadow-[8px_8px_0px_0px_#020617] sm:p-5"
+          className="w-full border-2 border-edge bg-panel p-4 shadow-[8px_8px_0px_0px_#000] sm:p-5"
         >
           <div className="px-1">
-            <h2 className="text-xl font-black tracking-tight text-slate-950 uppercase">Entrá a jugar</h2>
-            <p className="text-sm text-slate-500">Creá una sala y compartí el código, o sumate a una.</p>
+            <h2 className="font-pixel text-lg text-cream uppercase">Entrá a jugar</h2>
+            <p className="mt-1 text-sm text-slate-400">Creá una sala y compartí el código, o sumate a una.</p>
           </div>
 
-          <label htmlFor="nickname" className="mt-4 block px-1 pb-2 font-mono text-[11px] font-semibold tracking-wider text-slate-500 uppercase">
+          <label htmlFor="nickname" className="mt-5 block px-1 pb-2 font-pixel text-[10px] tracking-wider text-slate-500 uppercase">
             Tu jugador
           </label>
-          <div className="flex items-center gap-2 rounded-full border-2 border-slate-950 bg-white p-1.5 transition-shadow focus-within:shadow-[0_0_0_3px_#93c5fd]">
+          <div className="flex items-center gap-2 border-2 border-edge-soft bg-crt p-1.5 transition-colors focus-within:border-neon">
             <AvatarPicker value={profile.avatar} onChange={(avatar) => onProfileChange({ ...profile, avatar })} />
             <input
               id="nickname"
@@ -119,9 +102,9 @@ export function Lobby({ profile, onProfileChange, category, onCategoryChange, de
               placeholder="Tu apodo"
               autoComplete="nickname"
               maxLength={NAME_MAX_LENGTH}
-              className="min-w-0 flex-1 bg-transparent px-1 text-base font-bold text-slate-950 outline-none placeholder:font-medium placeholder:text-slate-500"
+              className="min-w-0 flex-1 bg-transparent px-1 text-base font-bold text-slate-100 outline-none placeholder:font-medium placeholder:text-slate-500"
             />
-            <span className="pr-3 font-mono text-[11px] text-slate-400 tabular-nums" aria-hidden="true">
+            <span className="pr-2 font-pixel text-[10px] text-slate-500 tabular-nums" aria-hidden="true">
               {profile.name.length}/{NAME_MAX_LENGTH}
             </span>
           </div>
@@ -131,19 +114,19 @@ export function Lobby({ profile, onProfileChange, category, onCategoryChange, de
           <PillButton type="submit" size="lg" className="mt-4 w-full" disabled={busy !== null}>
             {busy === "create" ? "Creando sala…" : "Crear sala"}
             {busy !== "create" && (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="h-4 w-4">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="square" strokeLinejoin="miter" aria-hidden="true" className="h-4 w-4">
                 <path d="M5 12h14M13 6l6 6-6 6" />
               </svg>
             )}
           </PillButton>
 
           <div className="my-5 flex items-center gap-3 px-2" aria-hidden="true">
-            <span className="h-0.5 flex-1 bg-slate-950" />
-            <span className="font-mono text-[11px] font-semibold tracking-wider text-slate-500 uppercase">o unite con un código</span>
-            <span className="h-0.5 flex-1 bg-slate-950" />
+            <span className="h-0.5 flex-1 bg-edge" />
+            <span className="font-pixel text-[10px] tracking-wider text-slate-500 uppercase">o unite con código</span>
+            <span className="h-0.5 flex-1 bg-edge" />
           </div>
 
-          <div className="flex items-center gap-2 rounded-full border-2 border-slate-950 bg-white p-1.5 transition-shadow focus-within:shadow-[0_0_0_3px_#93c5fd]">
+          <div className="flex items-center gap-2 border-2 border-edge-soft bg-crt p-1.5 transition-colors focus-within:border-neon">
             <label htmlFor="room-code" className="sr-only">Código de sala</label>
             <input
               id="room-code"
@@ -162,23 +145,23 @@ export function Lobby({ profile, onProfileChange, category, onCategoryChange, de
               autoComplete="off"
               autoCapitalize="characters"
               spellCheck={false}
-              className="min-w-0 flex-1 bg-transparent pl-4 font-mono text-lg font-bold tracking-[0.3em] text-slate-950 uppercase outline-none placeholder:text-slate-400"
+              className="min-w-0 flex-1 bg-transparent pl-3 font-pixel text-lg tracking-[0.3em] text-emerald-400 uppercase outline-none placeholder:text-slate-600"
             />
-            <PillButton variant="dark" size="md" onClick={join} disabled={busy !== null} className="font-bold">
+            <PillButton variant="secondary" size="md" onClick={join} disabled={busy !== null} className="border-edge-soft">
               {busy === "join" ? "Uniendo…" : "Unirse"}
             </PillButton>
           </div>
 
-          <p className="min-h-5 px-2 pt-3 text-center text-sm font-semibold text-rose-600" role="alert">
+          <p className="min-h-5 px-2 pt-3 text-center text-sm font-semibold text-hot" role="alert">
             {message}
           </p>
 
-          <div className="mt-1 flex items-center justify-between border-t-2 border-slate-950 px-1 pt-4">
-            <span className="text-sm text-slate-500">¿Sin amigos a mano?</span>
+          <div className="mt-1 flex items-center justify-between border-t-2 border-edge px-1 pt-4">
+            <span className="text-sm text-slate-400">¿Sin amigos a mano?</span>
             <button
               type="button"
               onClick={onSolo}
-              className="cursor-pointer font-mono text-xs font-semibold tracking-wider text-blue-600 uppercase underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+              className="cursor-pointer font-pixel text-xs tracking-wider text-neon-bright uppercase underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neon-bright"
             >
               Jugar solo →
             </button>

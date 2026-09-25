@@ -1,19 +1,20 @@
 import type { ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/ui/cn";
 
-type Variant = "primary" | "dark" | "light";
+type Variant = "primary" | "secondary" | "ghost";
 type Size = "sm" | "md" | "lg";
 
 const VARIANTS: Record<Variant, string> = {
-  primary: "bg-blue-600 text-white enabled:hover:bg-blue-700",
-  dark: "bg-slate-950 text-white enabled:hover:bg-slate-800",
-  light: "bg-white text-slate-950 enabled:hover:bg-slate-50",
+  /* Verde neón de CRT, con halo. */
+  primary: "border-black bg-neon text-crt shadow-[4px_4px_0px_0px_#000,0_0_22px_rgb(16_185_129/0.35)] enabled:hover:bg-neon-bright",
+  secondary: "border-black bg-panel text-slate-100 shadow-pixel enabled:hover:bg-edge",
+  ghost: "border-edge-soft bg-crt text-slate-200 shadow-pixel enabled:hover:bg-panel",
 };
 
 const SIZES: Record<Size, string> = {
-  sm: "h-9 px-4 text-xs",
-  md: "h-11 px-5 text-sm",
-  lg: "h-14 px-8 text-base sm:text-lg",
+  sm: "h-9 px-3 text-[11px]",
+  md: "h-11 px-5 text-xs",
+  lg: "h-14 px-6 text-sm sm:text-base",
 };
 
 interface PillButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -21,17 +22,21 @@ interface PillButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: Size;
 }
 
-/** Cápsula táctil: borde oscuro de 2px, sombra dura y "hundido" al apretar. */
+/**
+ * Botón de arcade: esquinas duras, borde de 2px, sombra de píxel y tipografía pixel.
+ * Al pasar el mouse se "levanta"; al apretar baja y pierde la sombra.
+ */
 export function PillButton({ variant = "primary", size = "md", className, type = "button", ...props }: PillButtonProps) {
   return (
     <button
       type={type}
       className={cn(
-        "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full border-2 border-slate-950 font-extrabold tracking-wider whitespace-nowrap uppercase",
-        "shadow-[3px_3px_0_0_#020617] transition-[translate,box-shadow,background-color] duration-100",
-        "enabled:active:translate-y-0.5 enabled:active:shadow-[1px_1px_0_0_#020617]",
-        "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600",
-        "disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none",
+        "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 border-2 font-pixel tracking-wide whitespace-nowrap uppercase",
+        "transition-[translate,box-shadow,background-color] duration-100",
+        "enabled:hover:-translate-x-0.5 enabled:hover:-translate-y-0.5",
+        "enabled:active:translate-x-0.5 enabled:active:translate-y-0.5 enabled:active:shadow-none",
+        "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-neon-bright",
+        "disabled:cursor-not-allowed disabled:border-edge disabled:bg-panel-deep disabled:text-slate-600 disabled:shadow-none",
         VARIANTS[variant],
         SIZES[size],
         className,

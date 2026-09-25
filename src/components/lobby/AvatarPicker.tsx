@@ -39,7 +39,7 @@ export function AvatarPicker({ value, onChange }: AvatarPickerProps) {
         aria-label={`Avatar: ${value}. Cambiar`}
         aria-expanded={open}
         aria-haspopup="dialog"
-        className="grid h-11 w-11 cursor-pointer place-items-center rounded-full bg-white text-2xl shadow-[0_1px_2px_rgb(2_6_23/0.08)] ring-1 ring-slate-200 transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 active:translate-y-0.5"
+        className="grid h-10 w-10 cursor-pointer place-items-center border-2 border-edge bg-panel text-2xl transition-colors hover:border-neon focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neon-bright active:translate-y-0.5"
       >
         {value}
       </button>
@@ -53,7 +53,7 @@ export function AvatarPicker({ value, onChange }: AvatarPickerProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -4, scale: 0.97 }}
             transition={{ duration: 0.12 }}
-            className="absolute top-full left-0 z-30 mt-2 grid w-64 grid-cols-4 gap-1.5 rounded-3xl bg-white p-2.5 shadow-[0_18px_40px_-12px_rgb(2_6_23/0.35)] ring-1 ring-slate-200"
+            className="absolute top-full left-0 z-30 mt-2 grid w-64 grid-cols-4 gap-1.5 border-2 border-edge bg-panel p-2 shadow-pixel-lg"
           >
             {AVATARS.map((avatar) => (
               <button
@@ -66,8 +66,8 @@ export function AvatarPicker({ value, onChange }: AvatarPickerProps) {
                 aria-label={avatar}
                 aria-pressed={avatar === value}
                 className={cn(
-                  "grid aspect-square cursor-pointer place-items-center rounded-full text-2xl transition-colors focus-visible:outline-2 focus-visible:outline-blue-600",
-                  avatar === value ? "bg-blue-100 ring-2 ring-blue-600" : "hover:bg-slate-100",
+                  "grid aspect-square cursor-pointer place-items-center border-2 text-2xl transition-colors focus-visible:outline-2 focus-visible:outline-neon-bright",
+                  avatar === value ? "border-neon bg-neon/15" : "border-transparent hover:border-edge-soft hover:bg-crt",
                 )}
               >
                 {avatar}

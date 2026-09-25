@@ -1,13 +1,12 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
 import { pointsAt } from "@/lib/game/rules";
 import { cn } from "@/lib/ui/cn";
 
 interface GameHudProps {
   score: number;
-  /** Aciertos seguidos al final de las rondas jugadas. */
-  streak: number;
+  roundIndex: number;
+  totalRounds: number;
   /** Segundos restantes (con decimales) y duración de la ronda. */
   timeLeft: number;
   duration: number;
@@ -15,143 +14,84 @@ interface GameHudProps {
   isRevealed: boolean;
   /** Puntos que sumó esta ronda según el servidor, cuando ya terminó para vos. */
   earnedPoints: number | null;
-  /** Últimos segundos: el tanque parpadea en coral. */
+  /** Últimos segundos: el reloj pasa a rosa neón y late. */
   tense: boolean;
   onExit?: () => void;
 }
 
-type GaugeState = "running" | "frozen" | "won" | "lost";
+const PILL = "flex h-12 items-center gap-2.5 border-2 border-edge bg-panel px-3 shadow-pixel";
+const LABEL = "font-pixel text-[10px] leading-none tracking-wider text-cream/60 uppercase";
+/* Dígitos de reloj digital: pixel, verde neón con un leve resplandor. */
+const DIGITS = "font-pixel text-lg leading-none tabular-nums [text-shadow:0_0_8px_currentColor]";
 
-const LABEL: Record<GaugeState, string> = {
-  running: "En juego",
-  frozen: "Frenado",
-  won: "¡Sumaste!",
-  lost: "No suma",
-};
-
-/** Marca de Pixel Rush: un "píxel" 2×2. */
-function LogoMark() {
-  return (
-    <span aria-hidden="true" className="grid h-8 w-8 shrink-0 grid-cols-2 gap-0.5 rounded-lg border-2 border-slate-900 bg-slate-900 p-1">
-      <span className="rounded-[2px] bg-mint" />
-      <span className="rounded-[2px] bg-peach" />
-      <span className="rounded-[2px] bg-butter" />
-      <span className="rounded-[2px] bg-coral" />
-    </span>
-  );
+/** Puntos en juego (o los que sumaste) junto al reloj. */
+function roundPoints({ timeLeft, duration, isPaused, isRevealed, earnedPoints }: Pick<GameHudProps, "timeLeft" | "duration" | "isPaused" | "isRevealed" | "earnedPoints">) {
+  if (isRevealed) {
+    const won = (earnedPoints ?? 0) > 0;
+    return { text: won ? `+${earnedPoints}` : "+0", className: won ? "text-neon-bright" : "text-slate-600" };
+  }
+  const live = pointsAt(Math.max(0, (duration - timeLeft) * 1000));
+  return { text: `${live}`, className: isPaused ? "text-arcade-bright" : "text-arcade" };
 }
 
-/** Píldora izquierda: puntaje total y racha. */
-function ScorePill({ score, streak }: { score: number; streak: number }) {
-  return (
-    <div className="flex h-14 items-center gap-3 rounded-full border-2 border-slate-900 bg-peach py-1 pr-2 pl-2 shadow-[3px_3px_0px_0px_#0F172A]">
-      <LogoMark />
-      <div className="leading-none" aria-label={`${score} puntos`}>
-        <p className="font-mono text-[10px] font-bold tracking-wider text-slate-900/60 uppercase">Puntaje</p>
-        <p className="mt-0.5 font-mono text-xl font-black text-slate-950 tabular-nums">{score.toLocaleString("es-AR")}</p>
-      </div>
-      <span
-        className={cn(
-          "rounded-full border-2 border-slate-900 px-2.5 py-1 font-mono text-[11px] font-black tracking-wide uppercase transition-colors",
-          streak >= 2 ? "bg-slate-900 text-peach" : "bg-paper text-slate-400",
-        )}
-        aria-label={`Racha de ${streak}`}
-      >
-        Racha {streak}
-      </span>
-    </div>
-  );
-}
-
-/**
- * Píldora derecha: tanque de "combustible" con un segmento por segundo (E vacío, F lleno).
- * Verde con tiempo de sobra, manteca a mitad de camino, coral al final.
- */
-function FuelGauge({ timeLeft, duration, isPaused, isRevealed, earnedPoints, tense }: Omit<GameHudProps, "score" | "streak" | "onExit">) {
-  const elapsedMs = Math.max(0, (duration - timeLeft) * 1000);
-  const state: GaugeState = isRevealed ? ((earnedPoints ?? 0) > 0 ? "won" : "lost") : isPaused ? "frozen" : "running";
-  const points = state === "won" ? earnedPoints! : state === "lost" ? 0 : pointsAt(elapsedMs);
+/** HUD 8-bit: puntaje, ronda y reloj como displays digitales, más salir. */
+export function GameHud({ score, roundIndex, totalRounds, tense, onExit, ...clock }: GameHudProps) {
+  const { timeLeft, duration, isPaused, isRevealed } = clock;
   const segments = Math.round(duration);
   const filled = Math.ceil(Math.max(0, timeLeft));
   const ratio = duration > 0 ? timeLeft / duration : 0;
-  const fuel = tense ? "bg-coral" : ratio > 0.5 ? "bg-mint" : ratio > 0.2 ? "bg-butter" : "bg-coral";
+  const block = tense ? "animate-pulse bg-hot" : isPaused || isRevealed ? "bg-slate-500" : ratio > 0.2 ? "bg-neon" : "bg-arcade";
+  const points = roundPoints(clock);
 
   return (
-    <div
-      className={cn(
-        "flex h-14 min-w-0 flex-1 items-center gap-3 rounded-full border-2 border-slate-900 py-1 pr-4 pl-4 shadow-[3px_3px_0px_0px_#0F172A] transition-colors duration-300",
-        tense ? "bg-[#FFE3D9]" : state === "won" ? "bg-mint" : "bg-paper",
-      )}
-    >
-      <div className="w-[5.5rem] shrink-0 leading-none">
-        <p className="font-mono text-[10px] font-bold tracking-wider text-slate-900/60 uppercase">{LABEL[state]}</p>
-        <AnimatePresence mode="popLayout" initial={false}>
-          <motion.p
-            key={state === "won" || state === "lost" ? state : "live"}
-            initial={{ scale: 1.3, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 500, damping: 28 }}
-            className={cn("mt-0.5 origin-left font-mono text-xl font-black tabular-nums", state === "lost" ? "text-slate-400" : "text-slate-950")}
-          >
-            {state === "won" && "+"}
-            {points.toLocaleString("es-AR")}
-          </motion.p>
-        </AnimatePresence>
+    // Mobile: [puntaje][ronda] ··· [salir] arriba y el reloj a lo ancho. Desktop: todo en una línea.
+    <div className="mb-5 flex flex-wrap items-center gap-2.5 sm:flex-nowrap">
+      <div className={cn(PILL, "order-1")} aria-label={`Puntaje ${score}`}>
+        <span className={LABEL}>Score</span>
+        <span className={cn(DIGITS, "text-emerald-400")}>{String(score).padStart(5, "0")}</span>
       </div>
 
-      <span className="font-mono text-xs font-black text-slate-900" aria-hidden="true">E</span>
-      <div
-        role="meter"
-        aria-label="Tiempo restante"
-        aria-valuemin={0}
-        aria-valuemax={duration}
-        aria-valuenow={Math.round(timeLeft * 10) / 10}
-        className="flex h-6 min-w-0 flex-1 items-stretch gap-[3px] rounded-md border-2 border-slate-900 bg-slate-900 p-[3px]"
-      >
-        {Array.from({ length: segments }, (_, i) => (
-          <span
-            key={i}
-            className={cn(
-              "flex-1 rounded-[2px] transition-colors duration-200",
-              i < filled ? fuel : "bg-slate-700",
-              i < filled && tense && "animate-pulse",
-              i < filled && (isPaused || isRevealed) && !tense && "opacity-70",
-            )}
-          />
-        ))}
+      <div className={cn(PILL, "order-2")} aria-label={`Ronda ${roundIndex + 1} de ${totalRounds}`}>
+        <span className={LABEL}>Ronda</span>
+        <span className={cn(DIGITS, "text-emerald-400")}>
+          {roundIndex + 1}/{totalRounds}
+        </span>
       </div>
-      <span className="font-mono text-xs font-black text-slate-900" aria-hidden="true">F</span>
 
-      <span className={cn("w-12 shrink-0 text-right font-mono text-sm font-black tabular-nums", tense ? "text-[#C2410C]" : "text-slate-950")}>
-        {timeLeft.toFixed(1)}s
-      </span>
-    </div>
-  );
-}
-
-/** HUD del juego: dos píldoras flotantes (puntaje y tiempo) y salir. */
-export function GameHud({ score, streak, onExit, ...gauge }: GameHudProps) {
-  return (
-    // Mobile: [puntaje ··· salir] arriba y el tanque a lo ancho. Desktop: puntaje | tanque | salir.
-    <div className="mb-6 flex flex-wrap items-center gap-3 sm:flex-nowrap">
-      <div className="order-1">
-        <ScorePill score={score} streak={streak} />
+      <div className={cn(PILL, "order-4 w-full min-w-0 sm:order-3 sm:w-auto sm:flex-1", tense && "border-hot")}>
+        <span className={LABEL}>Time</span>
+        <span className={cn(DIGITS, "w-14 shrink-0", tense ? "text-hot" : "text-emerald-400")}>
+          {timeLeft.toFixed(1).padStart(4, "0")}
+        </span>
+        <div
+          role="meter"
+          aria-label="Tiempo restante"
+          aria-valuemin={0}
+          aria-valuemax={duration}
+          aria-valuenow={Math.round(timeLeft * 10) / 10}
+          className="flex h-4 min-w-0 flex-1 gap-[2px] border-2 border-black bg-black p-[2px]"
+        >
+          {Array.from({ length: segments }, (_, i) => (
+            <span key={i} className={cn("flex-1 transition-colors duration-200", i < filled ? block : "bg-edge")} />
+          ))}
+        </div>
+        <span className={cn("hidden w-12 shrink-0 text-right font-pixel text-xs tabular-nums sm:inline", points.className)} aria-label="Puntos en juego">
+          {points.text}
+        </span>
       </div>
+
       {onExit && (
         <button
           type="button"
           onClick={onExit}
           aria-label="Salir al lobby"
-          className="order-2 ml-auto grid h-11 w-11 shrink-0 cursor-pointer place-items-center rounded-full border-2 border-slate-900 bg-paper text-slate-900 shadow-[2px_2px_0px_0px_#0F172A] transition-transform hover:bg-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 active:translate-y-0.5 active:shadow-none sm:order-3 sm:ml-0"
+          className="order-3 ml-auto grid h-12 w-12 shrink-0 cursor-pointer place-items-center border-2 border-edge bg-panel text-slate-300 shadow-pixel transition-[translate,box-shadow,color] duration-100 hover:text-hot focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neon-bright active:translate-x-0.5 active:translate-y-0.5 active:shadow-none sm:order-4 sm:ml-0"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden="true" className="h-3.5 w-3.5">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="square" aria-hidden="true" className="h-3.5 w-3.5">
             <path d="M6 6l12 12M18 6 6 18" />
           </svg>
         </button>
       )}
-      <div className="order-3 flex w-full min-w-0 sm:order-2 sm:w-auto sm:flex-1">
-        <FuelGauge {...gauge} />
-      </div>
     </div>
   );
 }

@@ -27,11 +27,11 @@ function ReadyPill({ ready }: { ready: boolean }) {
         exit={{ scale: 0.6, opacity: 0 }}
         transition={{ type: "spring", stiffness: 520, damping: 26 }}
         className={cn(
-          "inline-flex items-center gap-1 rounded-full px-3 py-1 font-mono text-[11px] font-bold tracking-wider whitespace-nowrap uppercase",
-          ready ? "border-2 border-emerald-700 bg-emerald-400 text-emerald-950" : "bg-slate-100 text-slate-500",
+          "inline-flex items-center gap-1.5 border-2 px-2 py-1 font-pixel text-[10px] tracking-wider whitespace-nowrap uppercase",
+          ready ? "border-black bg-neon text-crt shadow-[0_0_14px_rgb(16_185_129/0.5)]" : "border-edge bg-crt text-slate-400",
         )}
       >
-        <span className={cn("h-1.5 w-1.5 rounded-full", ready ? "bg-emerald-950" : "animate-pulse bg-slate-400")} aria-hidden="true" />
+        <span className={cn("h-1.5 w-1.5", ready ? "bg-crt" : "animate-pulse bg-slate-500")} aria-hidden="true" />
         {ready ? "¡Listo!" : "Esperando..."}
       </motion.span>
     </AnimatePresence>
@@ -46,22 +46,22 @@ function PlayerCard({ player }: { player: RoomPlayerView }) {
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ type: "spring", stiffness: 380, damping: 30 }}
       className={cn(
-        "relative flex flex-col items-center gap-2 rounded-3xl p-4 text-center transition-colors duration-300 sm:p-5",
-        player.ready ? "bg-emerald-50 ring-2 ring-emerald-500" : "bg-white/80 ring-1 ring-slate-200",
+        "relative flex flex-col items-center gap-2 border-2 bg-panel p-4 text-center transition-[border-color,box-shadow] duration-300 sm:p-5",
+        player.ready ? "border-neon shadow-[4px_4px_0px_0px_#000,0_0_24px_rgb(16_185_129/0.3)]" : "border-edge shadow-pixel",
       )}
     >
       {player.isHost && (
-        <span className="absolute top-3 left-3 rounded-full bg-blue-600 px-2 py-0.5 font-mono text-[9px] font-semibold tracking-wider text-white uppercase">
+        <span className="absolute top-2 left-2 border border-black bg-cyan-400 px-1.5 py-0.5 font-pixel text-[8px] tracking-wider text-black uppercase">
           Anfitrión
         </span>
       )}
-      <span className="relative grid h-16 w-16 place-items-center rounded-full bg-white text-4xl shadow-[0_1px_2px_rgb(2_6_23/0.08)] ring-1 ring-slate-200 sm:h-20 sm:w-20 sm:text-5xl" aria-hidden="true">
+      <span className="relative grid h-16 w-16 place-items-center border-2 border-edge bg-crt text-4xl sm:h-20 sm:w-20 sm:text-5xl" aria-hidden="true">
         {player.avatar}
-        <span className={cn("absolute right-0.5 bottom-0.5 h-3.5 w-3.5 rounded-full border-2 border-white", player.online ? "bg-emerald-500" : "bg-slate-300")} />
+        <span className={cn("absolute -right-1 -bottom-1 h-3 w-3 border-2 border-panel", player.online ? "bg-neon" : "bg-slate-600")} />
       </span>
-      <p className="w-full truncate text-base font-bold text-slate-950">
+      <p className="w-full truncate text-base font-bold text-slate-100">
         {player.name}
-        {player.isYou && <span className="ml-1 font-mono text-[10px] font-medium text-slate-400">VOS</span>}
+        {player.isYou && <span className="ml-1 font-pixel text-[9px] text-neon">VOS</span>}
       </p>
       <ReadyPill ready={player.ready} />
     </motion.li>
@@ -95,22 +95,22 @@ export function WaitingRoom({ view, busy, error, onToggleReady, onForceStart, on
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-4 py-5 sm:px-6 sm:py-8">
       <TopCapsule>
-        <PillButton variant="light" size="sm" onClick={onLeave}>Salir</PillButton>
+        <PillButton variant="ghost" size="sm" onClick={onLeave}>Salir</PillButton>
       </TopCapsule>
 
       <section className="flex flex-1 flex-col py-8 sm:py-10">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-slate-950 bg-white px-3 py-1 font-mono text-[11px] font-semibold tracking-wider text-slate-950 uppercase">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-600" aria-hidden="true" />
+          <span className="inline-flex items-center gap-1.5 border-2 border-edge bg-panel px-2 py-1 font-pixel text-[10px] tracking-wider text-slate-300 uppercase">
+            <span className="h-1.5 w-1.5 animate-pulse bg-hot" aria-hidden="true" />
             Sala {view.code}
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-slate-950 bg-white px-3 py-1 font-mono text-[11px] font-semibold tracking-wider text-slate-950 uppercase">
+          <span className="inline-flex items-center gap-1.5 border-2 border-edge bg-panel px-2 py-1 font-pixel text-[10px] tracking-wider text-slate-300 uppercase">
             <span aria-hidden="true">{view.category.emoji}</span> {view.category.label}
           </span>
         </div>
-        <h1 className="mt-4 text-4xl font-black tracking-tighter text-slate-950 sm:text-5xl">¿Listos para jugar?</h1>
-        <p className="mt-2 text-slate-600">
-          Tocá <strong className="text-slate-950">¡Estoy listo!</strong> cuando quieras arrancar. La partida empieza sola cuando están todos.
+        <h1 className="mt-5 font-pixel text-3xl text-cream uppercase sm:text-4xl">¿Listos para jugar?</h1>
+        <p className="mt-3 text-slate-400">
+          Tocá <strong className="text-neon-bright">¡Estoy listo!</strong> cuando quieras arrancar. La partida empieza sola cuando están todos.
         </p>
 
         <ul className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4" aria-label="Jugadores en la sala">
@@ -118,38 +118,38 @@ export function WaitingRoom({ view, busy, error, onToggleReady, onForceStart, on
           {Array.from({ length: emptySlots }, (_, i) => (
             <li
               key={`empty-${i}`}
-              className="flex min-h-40 flex-col items-center justify-center gap-2 rounded-3xl border border-dashed border-slate-300 p-4 text-center font-mono text-xs text-slate-400"
+              className="flex min-h-40 flex-col items-center justify-center gap-2 border-2 border-dashed border-edge p-4 text-center font-pixel text-[10px] tracking-wider text-slate-600 uppercase"
             >
-              <span className="grid h-12 w-12 place-items-center rounded-full bg-slate-100 text-xl" aria-hidden="true">+</span>
+              <span className="grid h-12 w-12 place-items-center border-2 border-edge font-pixel text-xl text-slate-600" aria-hidden="true">+</span>
               Lugar libre
             </li>
           ))}
           {/* Última celda: código para invitar */}
-          <li className="flex min-h-40 flex-col items-center justify-center gap-3 rounded-3xl bg-slate-950 p-4 text-center text-white">
-            <span className="font-mono text-[10px] tracking-[0.2em] text-slate-400 uppercase">Invitá con el código</span>
-            <span className="font-mono text-2xl font-bold tracking-[0.3em] sm:text-3xl" aria-label={`Código ${view.code.split("").join(" ")}`}>
+          <li className="flex min-h-40 flex-col items-center justify-center gap-3 border-2 border-arcade bg-crt p-4 text-center shadow-pixel">
+            <span className="font-pixel text-[9px] tracking-widest text-slate-400 uppercase">Invitá con el código</span>
+            <span className="font-pixel text-2xl tracking-[0.25em] text-arcade [text-shadow:0_0_14px_rgb(245_158_11/0.55)] sm:text-3xl" aria-label={`Código ${view.code.split("").join(" ")}`}>
               {view.code}
             </span>
-            <PillButton variant="light" size="sm" onClick={() => void copyLink()}>
+            <PillButton variant="ghost" size="sm" onClick={() => void copyLink()}>
               {copied ? "¡Copiado!" : "Copiar link"}
             </PillButton>
           </li>
         </ul>
 
         {/* Barra de acción: queda pegada abajo en pantallas chicas */}
-        <div className="sticky bottom-4 mt-8 rounded-[2rem] bg-white/85 p-3 shadow-[0_18px_40px_-16px_rgb(2_6_23/0.35)] ring-1 ring-slate-200 backdrop-blur-md sm:p-4">
+        <div className="sticky bottom-4 mt-8 border-2 border-edge bg-panel/95 p-3 shadow-[6px_6px_0px_0px_#000] backdrop-blur-sm sm:p-4">
           <div className="flex items-center justify-between gap-3 px-2 pb-3">
-            <p className="text-sm font-semibold text-slate-700" aria-live="polite">{status}</p>
-            <p className="font-mono text-xs font-bold text-slate-950 tabular-nums">
+            <p className="text-sm font-semibold text-slate-300" aria-live="polite">{status}</p>
+            <p className="font-pixel text-xs text-emerald-400 tabular-nums">
               {view.readyCount}/{total} listos
             </p>
           </div>
-          <div className="mx-2 mb-3 h-1.5 overflow-hidden rounded-full bg-slate-200">
-            <div className="h-full rounded-full bg-emerald-500 transition-[width] duration-300" style={{ width: `${total ? (view.readyCount / total) * 100 : 0}%` }} />
+          <div className="mx-2 mb-3 h-2 overflow-hidden border border-black bg-edge">
+            <div className="h-full bg-neon transition-[width] duration-300" style={{ width: `${total ? (view.readyCount / total) * 100 : 0}%` }} />
           </div>
           <PillButton
             size="lg"
-            variant={imReady ? "light" : "primary"}
+            variant={imReady ? "ghost" : "primary"}
             className="w-full"
             onClick={() => onToggleReady(!imReady)}
             disabled={busy}
@@ -162,12 +162,12 @@ export function WaitingRoom({ view, busy, error, onToggleReady, onForceStart, on
               type="button"
               onClick={onForceStart}
               disabled={busy}
-              className="mt-2 block w-full cursor-pointer py-1.5 text-center font-mono text-xs tracking-wider text-slate-500 uppercase underline-offset-4 hover:text-slate-950 hover:underline disabled:cursor-not-allowed"
+              className="mt-2 block w-full cursor-pointer py-1.5 text-center font-pixel text-[10px] tracking-wider text-slate-500 uppercase underline-offset-4 hover:text-slate-200 hover:underline disabled:cursor-not-allowed"
             >
               Empezar sin esperar (anfitrión)
             </button>
           )}
-          {error && <p className="mt-2 text-center text-sm font-semibold text-rose-600" role="alert">{error}</p>}
+          {error && <p className="mt-2 text-center text-sm font-semibold text-hot" role="alert">{error}</p>}
         </div>
       </section>
     </main>

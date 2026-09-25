@@ -102,7 +102,6 @@ export function GameDemo() {
         score={score}
         roundIndex={roundIndex}
         totalRounds={mockRounds.length}
-        results={results.map((r) => r.correct)}
         isPaused={isPaused}
         isLocked={isLocked || isFinished}
         choices={round.choices}

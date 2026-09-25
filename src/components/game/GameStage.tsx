@@ -35,8 +35,6 @@ export interface GameStageProps {
   /** Ronda actual (desde 0) y total, para la barra de progreso. */
   roundIndex?: number;
   totalRounds?: number;
-  /** Resultado de las rondas ya jugadas (true = acierto). */
-  results?: boolean[];
   /** true = tiempo frenado, se ven las opciones y el botón dice REANUDAR. */
   isPaused?: boolean;
   /** true = ronda cerrada (respondida o sin tiempo): nada se puede tocar. */
@@ -70,13 +68,6 @@ export interface GameStageProps {
 
 const TENSION_SECONDS = 3;
 
-/** Aciertos seguidos al final de la lista de resultados. */
-function trailingStreak(results: boolean[]): number {
-  let streak = 0;
-  for (let i = results.length - 1; i >= 0 && results[i]; i--) streak++;
-  return streak;
-}
-
 /** Pantalla principal del juego. Solo pinta lo que recibe por props. */
 export function GameStage({
   imageUrl,
@@ -86,7 +77,6 @@ export function GameStage({
   score,
   roundIndex = 0,
   totalRounds = ROUNDS_PER_GAME,
-  results = [],
   isPaused = false,
   isLocked = false,
   canResume = true,
@@ -127,11 +117,12 @@ export function GameStage({
         Solo:  escenario centrado.
         Multi: jugadores | escenario (lg), + actividad (xl).
       */}
-      <main className="min-h-screen overflow-x-clip bg-cream bg-[radial-gradient(#E4DCCB_1px,transparent_1px)] [background-size:16px_16px] px-4 pt-5 pb-8 sm:px-6 sm:pt-8">
+      <main className="min-h-screen overflow-x-clip px-4 pt-5 pb-8 sm:px-6 sm:pt-8">
         <div className={cn("mx-auto w-full", hasPlayers ? "max-w-7xl" : "max-w-2xl")}>
           <GameHud
             score={score}
-            streak={trailingStreak(results)}
+            roundIndex={roundIndex}
+            totalRounds={totalRounds}
             timeLeft={timeLeft}
             duration={duration}
             isPaused={isPaused}
@@ -151,16 +142,12 @@ export function GameStage({
             {hasPlayers && <div className="lg:sticky lg:top-6">{players}</div>}
 
             <section className="min-w-0">
+              {/* Franja de acento estilo Atari: violeta → rosa → naranja → amarillo. */}
+              <div aria-hidden="true" className="mb-3 h-1 bg-[linear-gradient(90deg,#9333ea,#ec4899,#fb923c,#facc15)] shadow-[0_0_14px_rgb(236_72_153/0.45)]" />
+
               {/* El temblor va en un wrapper: la carta ya usa transform para entrar y salir. */}
               <div className={cn(isTense && "motion-safe:animate-micro-shake")}>
-                <CardDeck
-                  cardKey={roundIndex}
-                  roundIndex={roundIndex}
-                  totalRounds={totalRounds}
-                  results={results}
-                  label={category}
-                  tense={isTense}
-                >
+                <CardDeck cardKey={roundIndex} label={category} tense={isTense}>
                   <div className="relative">
                     <GameImage
                       src={imageUrl}
@@ -189,8 +176,8 @@ export function GameStage({
                 )}
               </AnimatePresence>
 
-              {/* Barra flotante: queda pegada abajo cuando la pantalla no alcanza. */}
-              <div className="sticky bottom-4 z-30 mt-5 flex items-center gap-2.5 rounded-full border-2 border-slate-900 bg-paper/95 p-2 shadow-[4px_4px_0px_0px_#0F172A] backdrop-blur-sm">
+              {/* Controles de arcade: quedan pegados abajo cuando la pantalla no alcanza. */}
+              <div className="sticky bottom-4 z-30 mt-6 flex items-center gap-3">
                 {onFetchAIHint && (
                   <HintButton hintsLeft={hintsLeft} disabled={hintPending || isLocked || isRevealed} onClick={() => void requestHint()} />
                 )}

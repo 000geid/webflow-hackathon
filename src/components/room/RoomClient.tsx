@@ -121,11 +121,11 @@ export function RoomClient({ code, token, onExit, notify, onFinished }: RoomClie
   if (!view) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
-        <p className="flex items-center gap-2 rounded-full border-2 border-slate-950 bg-white px-4 py-2 font-mono text-xs tracking-wider text-slate-600 uppercase" aria-live="polite">
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-600" aria-hidden="true" />
+        <p className="flex items-center gap-2 border-2 border-edge bg-panel px-4 py-2.5 font-pixel text-xs tracking-wider text-slate-300 uppercase shadow-pixel" aria-live="polite">
+          <span className="h-2 w-2 animate-pulse bg-neon" aria-hidden="true" />
           {error ?? `Conectando a la sala ${code}…`}
         </p>
-        <PillButton variant="light" size="sm" onClick={() => onExit()}>Volver al lobby</PillButton>
+        <PillButton variant="ghost" size="sm" onClick={() => onExit()}>Volver al lobby</PillButton>
       </main>
     );
   }
@@ -174,7 +174,6 @@ export function RoomClient({ code, token, onExit, notify, onFinished }: RoomClie
         score={view.score}
         roundIndex={round.index}
         totalRounds={view.totalRounds}
-        results={view.roundResults.filter((result): result is boolean => result !== null)}
         isPaused={status === "paused"}
         isLocked={busy || view.status !== "playing" || (status !== "revealing" && status !== "paused")}
         canResume={false}
@@ -197,7 +196,7 @@ export function RoomClient({ code, token, onExit, notify, onFinished }: RoomClie
       />
 
       {error && (
-        <p role="alert" className="fixed bottom-4 left-1/2 z-40 -translate-x-1/2 rounded-full border-2 border-slate-950 bg-rose-600 px-4 py-2 text-sm font-semibold whitespace-nowrap text-white shadow-hard-xs">
+        <p role="alert" className="fixed bottom-24 left-1/2 z-40 -translate-x-1/2 border-2 border-black bg-hot px-4 py-2 text-sm font-bold whitespace-nowrap text-black shadow-pixel">
           {error}
         </p>
       )}
