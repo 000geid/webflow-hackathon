@@ -1,6 +1,6 @@
 # Pixel Rush AI
 
-App Next.js para Webflow Cloud. La interfaz final está a cargo de Gabi y todavía no está integrada.
+App Next.js para Webflow Cloud. La interfaz de Gabi está en el repositorio, pero todavía muestra una ronda de prueba y no está conectada a los endpoints de partidas.
 
 ## Backend disponible
 
@@ -13,6 +13,15 @@ App Next.js para Webflow Cloud. La interfaz final está a cargo de Gabi y todav�
 
 Contrato, ejemplos y errores: [docs/backend-api.md](docs/backend-api.md).
 Esquema del CMS: [docs/webflow-cms.md](docs/webflow-cms.md).
+
+## Interfaz
+
+- Tailwind CSS v4. Los colores de marca están como tokens en `src/app/globals.css` (`bg-canvas`, `bg-brand`, `bg-success`).
+- `src/components/game/`: `GameStage` y sus piezas (`GameHeader`, `GameImage`, `GuessButton`, `OptionsGrid`, `OptionButton`). Solo pintan lo que reciben por props.
+- `src/components/ui/`: piezas genéricas (`Badge`).
+- `src/lib/ui/`: helpers de la interfaz (niveles de blur/zoom, estado visual de cada opción).
+- `src/mocks/`: ronda de prueba mientras la interfaz no esté conectada a los endpoints.
+- Las props de `GameStage` siguen los nombres de `GameView`. El mapeo está comentado en `GameStage.tsx`.
 
 ## Desarrollo
 
@@ -38,7 +47,6 @@ Variables en `.env.example`. Guardar valores reales en `.env.local` o secretos d
 
 ## Pendiente
 
-1. Importar y publicar [cinco desafíos de memes y cultura dev](content/challenges-memes-dev.csv) en `Challenges`. Los cinco ítems están publicados y completos en Webflow. El 25/09/2026 se corrigieron mediante MCP los campos que habían quedado vacíos al importar y se publicaron usando la Data API. Se comprobó una partida completa de cinco rondas en modo `webflow` con 5000 puntos.
-2. Configurar `WEBFLOW_SITE_TOKEN` con permiso `cms:read` y `WEBFLOW_COLLECTION_ID` para jugar con CMS real.
-3. Integrar la interfaz de Gabi, configurar la base real y desplegar en Webflow Cloud.
-4. Agregar generación de distractores por IA y límites de uso antes de abrir al público.
+Los [cinco desafíos de memes y cultura dev](content/challenges-memes-dev.csv) están publicados en Webflow. Se comprobó una partida local de cinco rondas en modo `webflow` con 5000 puntos.
+
+Pendiente: integrar la interfaz con la API, configurar secretos y migraciones en Cloud, y agregar generación de distractores por IA y límites de uso antes de abrir al público.
