@@ -54,6 +54,9 @@ export function gameView(id: string, state: GameState, now: number): GameView {
     roundIndex: state.index,
     totalRounds: state.rounds.length,
     score: state.rounds.reduce((sum, entry) => sum + (entry.result?.points ?? 0), 0),
+    roundResults: state.rounds.map((entry) => entry.result
+      ? entry.result.choiceId !== null && entry.result.choiceId === entry.content.correctChoiceId
+      : null),
     serverNow: now,
     round: {
       imageUrl: round.content.imageUrl,

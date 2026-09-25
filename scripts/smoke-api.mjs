@@ -10,7 +10,7 @@ async function call(path, body, token) {
   assert.equal(response.headers.get('cache-control'), 'no-store');
   return { status: response.status, data: await response.json() };
 }
-const created = await call('/api/games', { mode: 'fixture' });
+const created = await call('/api/games', {});
 assert.equal(created.status, 201, JSON.stringify(created.data));
 const { gameId, token } = created.data;
 const path = `/api/games/${gameId}`;
@@ -41,7 +41,7 @@ assert.equal(final.data.status, 'finished');
 assert.ok(final.data.score > 0 && final.data.score <= 5000);
 assert.equal('token' in final.data, false);
 console.log('PASS: partida completa, persistencia entre requests, auth, validación, pausas concurrentes y reintentos.');
-const race = await call('/api/games', { mode: 'fixture' });
+const race = await call('/api/games', {});
 const racePath = `/api/games/${race.data.gameId}`;
 const raceAction = (body) => call(`${racePath}/actions`, body, race.data.token);
 await raceAction({ type: 'start', roundIndex: 0 });
@@ -49,7 +49,7 @@ await raceAction({ type: 'pause', roundIndex: 0 });
 const results = await Promise.all(['A', 'B'].map(choiceId => raceAction({ type: 'answer', roundIndex: 0, choiceId })));
 assert.deepEqual(results.map(r => r.status).sort(), [200, 409]);
 console.log('PASS: dos respuestas simultáneas no sobrescriben el resultado.');
-const expiring = await call('/api/games', { mode: 'fixture' });
+const expiring = await call('/api/games', {});
 const expPath = `/api/games/${expiring.data.gameId}`;
 await call(`${expPath}/actions`, { type: 'start', roundIndex: 0 }, expiring.data.token);
 await new Promise(resolve => setTimeout(resolve, 15100));
