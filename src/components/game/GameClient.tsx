@@ -5,7 +5,6 @@ import { GameStage } from "@/components/game/GameStage";
 import { ROUND_DURATION_MS } from "@/lib/game/rules";
 import type { GameView } from "@/lib/game/types";
 import type { CategoryChoice } from "@/lib/game/categories";
-import { HINTS_PER_GAME } from "@/lib/game/hints";
 import type { GameSummary } from "@/lib/ui/achievements";
 import type { Toast } from "./LiveToast";
 import { VictoryModal } from "./VictoryModal";
@@ -236,10 +235,8 @@ export function GameClient({ onExit, onFinished, notify, player = { name: "", av
         open={view.status === "finished"}
         player={player}
         score={view.score}
-        maxScore={view.totalRounds * 1000}
         totalRounds={view.totalRounds}
         history={view.history}
-        hintsUsed={HINTS_PER_GAME - view.hintsLeft}
         edition="Solo"
         onPlayAgain={() => void createAndStart()}
         onExit={onExit}

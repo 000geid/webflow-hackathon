@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/ui/cn";
 
-type Variant = "primary" | "secondary" | "ghost";
+type Variant = "primary" | "secondary" | "ghost" | "accent";
 type Size = "sm" | "md" | "lg";
 
 const VARIANTS: Record<Variant, string> = {
@@ -9,6 +9,8 @@ const VARIANTS: Record<Variant, string> = {
   primary: "border-black bg-neon text-crt shadow-[4px_4px_0px_0px_#000,0_0_22px_rgb(16_185_129/0.35)] enabled:hover:bg-neon-bright",
   secondary: "border-black bg-panel text-slate-100 shadow-pixel enabled:hover:bg-edge",
   ghost: "border-edge-soft bg-crt text-slate-200 shadow-pixel enabled:hover:bg-panel",
+  /* Contorno violeta neón: acción secundaria con energía (compartir). */
+  accent: "border-purple-500 bg-crt text-purple-200 shadow-[4px_4px_0px_0px_#000,0_0_20px_rgb(168_85_247/0.45)] enabled:hover:bg-purple-500/10 enabled:hover:text-purple-100",
 };
 
 const SIZES: Record<Size, string> = {

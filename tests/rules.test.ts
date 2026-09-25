@@ -23,13 +23,17 @@ test("incorrect, expired, and invalid answers earn no points", () => {
   for (const elapsed of [-1, NaN, Infinity, 16000]) assert.equal(scoreForAnswer(elapsed, true), 0);
 });
 
-test("victory titles: hint beats score; high / medium / low by score ratio", async () => {
+test("victory ranks: GOAT ≥80 %, CRACK fast 40–60 %, NARNIA ≤20 % or too slow, else MEDIA PILAAA", async () => {
   const { victoryTitle } = await import("../src/lib/ui/victory");
-  const title = (score: number, hintsUsed = 0) => victoryTitle({ score, maxScore: 5000, hintsUsed }).title;
-  assert.equal(title(4900, 1), "Más bot que humano");
-  assert.equal(title(3500), "La / El GOAT");
-  assert.equal(title(3499), "Megamente");
-  assert.equal(title(1750), "Megamente");
-  assert.equal(title(1749), "El / La colgado/a");
-  assert.equal(victoryTitle({ score: 2000, maxScore: 5000, hintsUsed: 0 }).accent, "blue-dot");
+  const rank = (accuracy: number, averageMs: number | null) => victoryTitle({ accuracy, averageMs }).title;
+  assert.equal(rank(100, 12_000), "GOAT"); // la precisión manda aunque sea lento
+  assert.equal(rank(80, 2_000), "GOAT");
+  assert.equal(rank(60, 3_999), "¡CRACK!");
+  assert.equal(rank(40, 2_500), "¡CRACK!");
+  assert.equal(rank(60, 4_000), "MEDIA PILAAA");
+  assert.equal(rank(40, 9_999), "MEDIA PILAAA");
+  assert.equal(rank(60, 10_000), "EN NARNIA");
+  assert.equal(rank(40, null), "EN NARNIA");
+  assert.equal(rank(20, 1_000), "EN NARNIA");
+  assert.equal(rank(0, null), "EN NARNIA");
 });

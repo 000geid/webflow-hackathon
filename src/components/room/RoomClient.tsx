@@ -7,7 +7,6 @@ import type { Toast } from "@/components/game/LiveToast";
 import { PlayersPanel } from "@/components/game/PlayersPanel";
 import { RoundFeed } from "@/components/game/RoundFeed";
 import { PillButton } from "@/components/ui/PillButton";
-import { HINTS_PER_GAME } from "@/lib/game/hints";
 import type { RoomAction, RoomView } from "@/lib/game/room";
 import { ROUND_DURATION_MS } from "@/lib/game/rules";
 import type { GameSummary } from "@/lib/ui/achievements";
@@ -205,10 +204,8 @@ export function RoomClient({ code, token, onExit, notify, onFinished }: RoomClie
         open={view.status === "finished"}
         player={me ?? { name: "", avatar: "🦊" }}
         score={view.score}
-        maxScore={view.totalRounds * 1000}
         totalRounds={view.totalRounds}
         history={view.history}
-        hintsUsed={HINTS_PER_GAME - view.hintsLeft}
         edition={`Sala ${view.code}`}
         ranking={view.players.map((p) => ({ id: p.id, name: p.name, avatar: p.avatar, score: p.score, isYou: p.isYou }))}
         playAgainLabel={view.isHost ? "Revancha" : "Esperando revancha…"}
