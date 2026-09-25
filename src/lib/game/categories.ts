@@ -9,27 +9,17 @@ export const CATEGORIES = [
   {
     id: "tech", label: "Logos & Tech", emoji: "⚡",
     description: "Adiviná el logo: lenguajes, frameworks, apps y herramientas.",
-    aliases: ["logos y tech", "logos", "tech y geek", "tech", "geek", "cultura dev"],
+    aliases: ["logos tech", "logos y tech", "logos", "tech y geek", "tech", "geek", "cultura dev"],
   },
   {
-    id: "pop-arg", label: "Cultura Arg", emoji: "🇦🇷",
-    description: "Ídolos, programas, frases y momentos bien argentinos.",
-    aliases: ["cultura argentina", "cultura pop arg", "cultura pop argentina", "pop arg"],
+    id: "memes", label: "Memes de Internet", emoji: "🤡",
+    description: "Los clásicos que viste mil veces en el grupo.",
+    aliases: ["memes del internet", "memes", "memes y cultura dev", "memes argentina", "cultura arg"],
   },
   {
     id: "cine-series", label: "Pelis & Series", emoji: "🍿",
     description: "Escenas, personajes y pósters de pelis y series.",
     aliases: ["pelis y series", "cine y series", "cine", "series", "peliculas"],
-  },
-  {
-    id: "memes", label: "Memes de Internet", emoji: "🤡",
-    description: "Los clásicos que viste mil veces en el grupo.",
-    aliases: ["memes del internet", "memes", "memes y cultura dev"],
-  },
-  {
-    id: "deportes", label: "Fútbol", emoji: "⚽",
-    description: "Jugadores, camisetas, estadios y goles históricos.",
-    aliases: ["futbol y deportes", "deportes"],
   },
 ] as const;
 

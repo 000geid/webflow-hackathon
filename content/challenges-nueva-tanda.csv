@@ -1,0 +1,8 @@
+name,slug,imagen,categoria,opcion-a,opcion-b,opcion-c,opcion-d,respuesta-correcta,activa
+Webflow,fotos-logo-webflow,fotos/logo-1.jpg,Logos tech,Webflow,Framer,WordPress,Wix,A,true
+CodeRabbit,fotos-logo-coderabbit,fotos/logo-2.jpg,Logos tech,Codeium,CodeRabbit,Copilot,Cursor,B,true
+Nvidia,fotos-logo-nvidia,fotos/logo-3.png,Logos tech,AMD,Intel,Nvidia,Radeon,C,true
+Spider-Man Pointing at Spider-Man,fotos-meme-spiderman,fotos/meme-spiderman.webp,Memes de Internet,This Is Fine,Distracted Boyfriend,Spider-Man señalando a Spider-Man,Drake Hotline Bling,C,true
+Estoy de novia - Lilita Carrió,fotos-meme-lilita,fotos/meme-argentina-1.jpg,Memes de Internet,Messirve,Estoy de novia - Lilita Carrió,Me perdí - Lilita,La bomba de tiempo,B,true
+Messirve,fotos-meme-messirve,fotos/meme-argentina-2.jpg,Memes de Internet,Messirve,Estoy de novia - Lilita Carrió,Messi en modo on,André-pede,A,true
+Not Sure If,fotos-meme-fry,fotos/meme-fry.jpg,Memes de Internet,Can't tell if joking or serious,Not sure if serious,Is this real life,Wait a minute,B,true
