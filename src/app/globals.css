@@ -2,25 +2,33 @@
 
 /*
  * Pixel Rush — Swiss-tech Brutalist.
- * Bordes oscuros finos, una sola sombra dura sutil y un único acento:
- * azul eléctrico. Todo lo demás es escala de grises (slate).
+ * Bordes oscuros, sombras duras sin blur y un único acento: azul eléctrico.
+ * Las superficies son cápsulas (rounded-full) sobre un fondo slate → azul con ruido.
  */
 @theme {
   --color-canvas: #f8fafc;
-  --color-ink: #090d16;
+  --color-ink: #020617;
   --color-brand: #2563eb;
   --color-brand-hover: #1d4ed8;
 
   --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
 
-  /* Sombras duras (sin blur): shadow-hard-xs … shadow-hard-lg */
+  /* Sombras duras (sin blur): shadow-hard-xs … shadow-hard-xl */
   --shadow-hard-xs: 2px 2px 0 0 var(--color-ink);
   --shadow-hard-sm: 3px 3px 0 0 var(--color-ink);
   --shadow-hard: 4px 4px 0 0 var(--color-ink);
   --shadow-hard-lg: 6px 6px 0 0 var(--color-ink);
+  --shadow-hard-xl: 8px 8px 0 0 var(--color-ink);
 
   --animate-shake: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  /* Tensión de los últimos 3 s: temblor continuo de 1px, apenas perceptible. */
+  --animate-micro-shake: micro-shake 0.28s linear infinite;
+  /* Botón de pista: halo índigo que late. */
+  --animate-glow: glow 2.2s ease-out infinite;
+  /* Tarjeta coleccionable: borde holográfico y brillo que cruza. */
+  --animate-holo: holo 6s linear infinite;
+  --animate-sheen: sheen 3.8s ease-in-out infinite;
 
   @keyframes shake {
     10%, 90% { transform: translateX(-1px); }
@@ -28,11 +36,39 @@
     30%, 50%, 70% { transform: translateX(-3px); }
     40%, 60% { transform: translateX(3px); }
   }
+
+  @keyframes glow {
+    0% { box-shadow: 0 0 0 0 rgb(79 70 229 / 0.45); }
+    70%, 100% { box-shadow: 0 0 0 10px rgb(79 70 229 / 0); }
+  }
+
+  @keyframes holo {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+  }
+
+  @keyframes sheen {
+    0%, 20% { background-position: 150% 0; }
+    80%, 100% { background-position: -50% 0; }
+  }
+
+  @keyframes micro-shake {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(-1px, 0.5px); }
+    50% { transform: translate(1px, -0.5px); }
+    75% { transform: translate(-0.5px, -0.5px); }
+  }
 }
 
-/* Fondo claro con una grilla de puntos muy sutil. */
+/* Lienzo slate claro con grilla de puntos fina, estilo papel milimetrado de arcade. */
+html {
+  min-height: 100%;
+  background-color: #f1f5f9;
+  background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
 body {
-  @apply bg-canvas font-sans text-ink antialiased;
-  background-image: radial-gradient(circle, rgb(15 23 42 / 0.07) 1px, transparent 1.2px);
-  background-size: 22px 22px;
+  @apply font-sans text-ink antialiased;
+  min-height: 100vh;
 }

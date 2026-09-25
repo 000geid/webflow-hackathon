@@ -3,10 +3,11 @@ import { cn } from "@/lib/ui/cn";
 
 type BadgeTone = "neutral" | "ink" | "danger";
 
+/* Sin bordes gruesos: los datos van en superficies planas; el borde se reserva para acciones. */
 const TONES: Record<BadgeTone, string> = {
-  neutral: "border-slate-900 bg-white text-slate-900",
-  ink: "border-slate-900 bg-slate-950 text-white",
-  danger: "border-rose-600 bg-rose-50 text-rose-600",
+  neutral: "bg-slate-100 text-slate-950",
+  ink: "bg-slate-950 text-white",
+  danger: "bg-rose-50 text-rose-600 ring-1 ring-rose-200",
 };
 
 interface BadgeProps {
@@ -16,13 +17,13 @@ interface BadgeProps {
   label?: string;
 }
 
-/** Pastilla de datos: número en mono, borde fino y sombra dura mínima. */
+/** Pastilla de datos: número en mono dentro de una cápsula. */
 export function Badge({ icon, children, tone = "neutral", label }: BadgeProps) {
   return (
     <span
       aria-label={label}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-md border-[1.5px] px-2.5 py-1.5 font-mono text-sm leading-none font-semibold tabular-nums shadow-hard-xs transition-colors duration-200",
+        "inline-flex h-9 items-center gap-1.5 rounded-full px-3 font-mono text-sm leading-none font-semibold tabular-nums transition-colors duration-200",
         TONES[tone],
       )}
     >

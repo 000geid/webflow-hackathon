@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { cn } from "@/lib/ui/cn";
 
 /* La carta nueva entra desde la derecha y la anterior sale hacia la izquierda.
    Solo desplazamiento + fade: sin rotación, para que se sienta preciso. */
@@ -16,11 +17,15 @@ interface CardDeckProps {
   cardKey: string | number;
   roundIndex: number;
   totalRounds: number;
+  /** Categoría de la ronda, se muestra como etiqueta. */
+  label?: string;
+  /** Últimos segundos: el borde se pone rojo. */
+  tense?: boolean;
   children: ReactNode;
 }
 
-/** Carta central con la imagen de la ronda. */
-export function CardDeck({ cardKey, roundIndex, totalRounds, children }: CardDeckProps) {
+/** Carta central con la imagen de la ronda. Superficie suave: el borde grueso queda para las acciones. */
+export function CardDeck({ cardKey, roundIndex, totalRounds, label, tense = false, children }: CardDeckProps) {
   return (
     <div className="relative mx-auto w-full">
       <AnimatePresence mode="popLayout" initial={false}>
@@ -30,18 +35,20 @@ export function CardDeck({ cardKey, roundIndex, totalRounds, children }: CardDec
           animate={CENTER}
           exit={EXIT}
           transition={SPRING}
-          className="relative rounded-xl border-2 border-slate-900 bg-white p-2.5 shadow-hard sm:p-3"
+          className={cn(
+            "relative rounded-3xl bg-white p-2 shadow-[0_24px_48px_-28px_rgb(2_6_23/0.35)] transition-shadow duration-300 sm:p-2.5",
+            tense ? "ring-2 ring-red-400" : "ring-1 ring-slate-200",
+          )}
         >
-          <div className="flex items-center justify-between px-1 pt-0.5 pb-2.5">
+          <div className="flex items-center justify-between gap-3 px-2.5 pt-1 pb-2.5">
             <p className="font-mono text-xs tracking-wider text-slate-500 uppercase">
-              Ronda {roundIndex + 1} de {totalRounds}
+              Ronda <span className="text-slate-950">{roundIndex + 1}</span> / {totalRounds}
             </p>
-            {/* Tres puntos monocromos, como el chrome de una ventana */}
-            <span aria-hidden="true" className="flex gap-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />
-              <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />
-              <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />
-            </span>
+            {label && (
+              <p className="truncate rounded-full bg-slate-100 px-2.5 py-1 font-mono text-[11px] tracking-wider text-slate-600 uppercase">
+                {label}
+              </p>
+            )}
           </div>
           {children}
         </motion.div>

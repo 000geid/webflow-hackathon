@@ -1,7 +1,11 @@
+import { HINTS_PER_GAME, maskedHint, type RoundHistory } from "./hints";
 import { ROUND_DURATION_MS, scoreForAnswer } from "./rules";
 import type { GameAction, GameState, GameView } from "./types";
 
 export class GameConflict extends Error {}
+
+export const correctLabel = (content: { choices: { id: string; label: string }[]; correctChoiceId: string }) =>
+  content.choices.find((choice) => choice.id === content.correctChoiceId)?.label ?? "";
 
 export function expireRound(state: GameState, now: number): void {
   const round = state.rounds[state.index];
@@ -23,6 +27,13 @@ export function applyAction(state: GameState, action: GameAction, now: number): 
     return;
   }
   if (round.startedAt === null) throw new GameConflict("Primero hay que iniciar la ronda.");
+  if (action.type === "hint") {
+    if (state.hintRound === state.index) return; // idempotente
+    if (round.result) throw new GameConflict("La ronda ya terminó.");
+    if (state.hintRound !== undefined && state.hintRound !== null) throw new GameConflict("Ya usaste tu pista de esta partida.");
+    state.hintRound = state.index;
+    return;
+  }
   if (action.type === "expire") {
     if (!round.result) throw new GameConflict("La ronda todavía no terminó.");
     return;
@@ -44,6 +55,17 @@ export function applyAction(state: GameState, action: GameAction, now: number): 
   };
 }
 
+/** Rondas terminadas, para la tarjeta final. */
+export function roundHistory(rounds: GameState["rounds"]): RoundHistory[] {
+  return rounds.filter((entry) => entry.result).map((entry) => ({
+    category: entry.content.category,
+    elapsedMs: entry.result!.choiceId !== null && entry.startedAt !== null && entry.pausedAt !== null
+      ? Math.min(entry.pausedAt - entry.startedAt, ROUND_DURATION_MS)
+      : null,
+    correct: entry.result!.choiceId !== null && entry.result!.choiceId === entry.content.correctChoiceId,
+  }));
+}
+
 export function gameView(id: string, state: GameState, now: number): GameView {
   const round = state.rounds[state.index];
   const status = round.result ? state.index === state.rounds.length - 1 ? "finished" : "answered" : round.pausedAt !== null ? "paused" : round.startedAt !== null ? "revealing" : "ready";
@@ -57,6 +79,8 @@ export function gameView(id: string, state: GameState, now: number): GameView {
     roundResults: state.rounds.map((entry) => entry.result
       ? entry.result.choiceId !== null && entry.result.choiceId === entry.content.correctChoiceId
       : null),
+    history: roundHistory(state.rounds),
+    hintsLeft: state.hintRound === undefined || state.hintRound === null ? HINTS_PER_GAME : 0,
     serverNow: now,
     round: {
       imageUrl: round.content.imageUrl,
@@ -66,6 +90,7 @@ export function gameView(id: string, state: GameState, now: number): GameView {
       elapsedMs: round.startedAt === null ? 0 : Math.max(0, Math.min((round.pausedAt ?? now) - round.startedAt, ROUND_DURATION_MS)),
       choices: round.pausedAt !== null || round.result ? round.content.choices : [],
       result: round.result ? { ...round.result, correctChoiceId: round.content.correctChoiceId } : null,
+      hint: state.hintRound === state.index ? maskedHint(correctLabel(round.content)) : null,
     },
   };
 }

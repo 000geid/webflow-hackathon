@@ -5,12 +5,12 @@ import type { GameAction, GameState } from "../game/types";
 import { ApiError } from "./api";
 
 const GAME_TTL_MS = 24 * 60 * 60 * 1000;
-async function database() {
+export async function database() {
   const { env } = await getCloudflareContext({ async: true });
   if (!env.DB) throw new ApiError(503, "DATABASE_UNAVAILABLE", "Falta configurar la base de datos.");
   return env.DB;
 }
-async function hash(token: string) {
+export async function hash(token: string) {
   const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token));
   return Array.from(new Uint8Array(bytes), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }

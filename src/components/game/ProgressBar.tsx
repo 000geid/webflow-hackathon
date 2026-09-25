@@ -12,10 +12,11 @@ interface ProgressBarProps {
   totalRounds: number;
   roundIndex: number;
   results: boolean[];
+  tense?: boolean;
 }
 
 /** Barra segmentada: un bloque fino por ronda. */
-export function ProgressBar({ totalRounds, roundIndex, results }: ProgressBarProps) {
+export function ProgressBar({ totalRounds, roundIndex, results, tense = false }: ProgressBarProps) {
   const segments = getProgressSegments(totalRounds, roundIndex, results);
 
   return (
@@ -29,7 +30,13 @@ export function ProgressBar({ totalRounds, roundIndex, results }: ProgressBarPro
       className="flex gap-1.5"
     >
       {segments.map((state, i) => (
-        <span key={i} className={cn("h-1.5 flex-1 rounded-full transition-colors duration-300", SEGMENT[state])} />
+        <span
+          key={i}
+          className={cn(
+            "h-1.5 flex-1 rounded-full transition-colors duration-300",
+            tense && state === "current" ? "animate-pulse bg-red-500" : SEGMENT[state],
+          )}
+        />
       ))}
     </div>
   );

@@ -4,15 +4,15 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/ui/cn";
 import type { OptionState } from "@/lib/ui/option-state";
 
-/* Botón blanco con borde fino oscuro. Los estados de resultado tiñen el
-   fondo y el borde en vez de pintar todo de color sólido. */
+/* Keycaps táctiles: fondo blanco, borde de 2px y sombra dura de 3px.
+   Los estados de resultado tiñen fondo, borde y sombra. */
 const CARD: Record<OptionState, string> = {
-  idle: "border-slate-800 bg-white text-slate-900 shadow-hard-xs enabled:hover:-translate-x-px enabled:hover:-translate-y-px enabled:hover:bg-slate-50 enabled:hover:shadow-hard-sm",
-  selected: "border-blue-600 bg-blue-50 text-slate-900 shadow-[2px_2px_0_0_var(--color-brand)]",
-  correct: "border-emerald-600 bg-emerald-50 text-emerald-900 shadow-[2px_2px_0_0_var(--color-emerald-600)]",
-  wrong: "border-rose-600 bg-rose-50 text-rose-900 shadow-[2px_2px_0_0_var(--color-rose-600)]",
+  idle: "border-slate-950 bg-white text-slate-950 shadow-[3px_3px_0_0_#020617] enabled:hover:-translate-y-px enabled:hover:bg-slate-50 enabled:hover:shadow-[4px_4px_0_0_#020617]",
+  selected: "border-blue-600 bg-blue-50 text-slate-950 shadow-[3px_3px_0_0_#2563eb]",
+  correct: "border-emerald-600 bg-emerald-50 text-emerald-900 shadow-[3px_3px_0_0_#059669]",
+  wrong: "border-rose-600 bg-rose-50 text-rose-900 shadow-[3px_3px_0_0_#e11d48]",
   revealed: "border-emerald-600 border-dashed bg-white text-emerald-800",
-  muted: "border-slate-300 bg-white text-slate-400",
+  muted: "border-slate-300 bg-white/70 text-slate-400",
 };
 
 /* Keycap discreta con la letra. */
@@ -46,10 +46,10 @@ export function OptionButton({ letter, label, state, disabled, onClick }: Option
         animate={isCorrect ? { scale: [1, 1.03, 1] } : { scale: 1 }}
         transition={isCorrect ? { duration: 0.35, ease: "easeOut" } : { duration: 0.15 }}
         className={cn(
-          "group relative flex w-full cursor-pointer items-center gap-3 rounded-xl border-[1.5px] px-3.5 py-3.5 text-left",
+          "group relative flex w-full cursor-pointer items-center gap-3 rounded-2xl border-2 px-3.5 py-3.5 text-left",
           "text-sm font-semibold tracking-tight sm:text-base",
           "transition-all duration-150",
-          "enabled:active:translate-x-[2px] enabled:active:translate-y-[2px] enabled:active:shadow-none",
+          "enabled:active:translate-y-0.5 enabled:active:shadow-[1px_1px_0_0_#020617]",
           "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600",
           "disabled:cursor-not-allowed",
           CARD[state],

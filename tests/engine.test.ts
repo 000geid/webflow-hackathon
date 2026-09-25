@@ -28,7 +28,7 @@ test("five rounds, frozen timing, hidden answers, idempotent scoring and complet
     assert.throws(() => applyAction(state, { type: "answer", roundIndex: i, choiceId: "B" }, now + 32000), GameConflict);
   }
   assert.equal(gameView("id", state, 500000).status, "finished");
-  assert.equal(gameView("id", state, 500000).score, 5000);
+  assert.equal(gameView("id", state, 500000).score, 4400); // 5 × 880 (frenó a los 2 s)
 });
 test("deadline wins over pause and answer; stale and future rounds rejected", () => {
   const state = game();
@@ -41,4 +41,23 @@ test("deadline wins over pause and answer; stale and future rounds rejected", ()
   assert.equal(gameView("id", state, 16000).score, 0);
   applyAction(state, { type: "start", roundIndex: 1 }, 17000);
   assert.throws(() => applyAction(state, { type: "pause", roundIndex: 0 }, 18000), GameConflict);
+});
+
+test("one hint per game: only after start, only for the live round, cleared on the next round", () => {
+  const state = game();
+  assert.throws(() => applyAction(state, { type: "hint", roundIndex: 0 }, 0), GameConflict);
+  applyAction(state, { type: "start", roundIndex: 0 }, 0);
+  assert.equal(gameView("id", state, 0).hintsLeft, 1);
+  applyAction(state, { type: "hint", roundIndex: 0 }, 1000);
+  applyAction(state, { type: "hint", roundIndex: 0 }, 1500); // idempotente
+  const view = gameView("id", state, 1500);
+  assert.equal(view.hintsLeft, 0);
+  assert.equal(view.round.hint, "1 palabra · Y__");
+  assert.equal(JSON.stringify(view).includes("correctChoiceId"), false);
+  applyAction(state, { type: "pause", roundIndex: 0 }, 2000);
+  applyAction(state, { type: "answer", roundIndex: 0, choiceId: "A" }, 2500);
+  applyAction(state, { type: "start", roundIndex: 1 }, 3000);
+  assert.equal(gameView("id", state, 3000).round.hint, null);
+  assert.throws(() => applyAction(state, { type: "hint", roundIndex: 1 }, 3500), GameConflict);
+  assert.deepEqual(gameView("id", state, 3500).history, [{ category: "test", elapsedMs: 2000, correct: true }]);
 });

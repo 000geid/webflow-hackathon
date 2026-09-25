@@ -1,6 +1,6 @@
 export { GameStage } from "./GameStage";
 export type { GameStageProps } from "./GameStage";
-export { GameResultsModal } from "./GameResultsModal";
-export type { GameResultsModalProps } from "./GameResultsModal";
+export { VictoryModal } from "./VictoryModal";
+export type { VictoryModalProps } from "./VictoryModal";
 export { GameDemo } from "./GameDemo";
 export { GameClient } from "./GameClient";
