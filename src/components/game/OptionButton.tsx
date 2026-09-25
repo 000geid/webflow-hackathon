@@ -4,24 +4,24 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/ui/cn";
 import type { OptionState } from "@/lib/ui/option-state";
 
-/* Tarjeta brutalista: borde negro 2px + sombra dura. */
+/* Tecla brutalista: borde negro 2px + sombra dura de 4px que se "hunde" al apretar. */
 const CARD: Record<OptionState, string> = {
-  idle: "bg-white text-ink shadow-hard-sm enabled:hover:-translate-x-px enabled:hover:-translate-y-px enabled:hover:shadow-hard-brand",
+  idle: "bg-white text-ink shadow-hard enabled:hover:-translate-x-px enabled:hover:-translate-y-px enabled:hover:shadow-hard-brand",
   selected: "bg-blue-100 text-ink shadow-hard-brand",
-  correct: "bg-emerald-500 text-white shadow-hard-sm",
-  wrong: "bg-rose-500 text-white shadow-hard-sm",
-  revealed: "bg-emerald-100 text-emerald-900 shadow-hard-sm",
+  correct: "bg-emerald-500 text-white shadow-hard",
+  wrong: "bg-rose-500 text-white shadow-hard",
+  revealed: "bg-emerald-100 text-emerald-900 shadow-hard",
   muted: "bg-white text-slate-400 opacity-50 shadow-none",
 };
 
-/* Tecla con la letra: amarillo eléctrico. */
+/* Keycap con la letra: amarillo eléctrico y su propia mini sombra dura. */
 const KEYCAP: Record<OptionState, string> = {
-  idle: "bg-highlight text-ink",
-  selected: "bg-highlight text-ink",
-  correct: "bg-white text-emerald-700",
-  wrong: "bg-white text-rose-600",
-  revealed: "bg-emerald-400 text-ink",
-  muted: "bg-slate-100 text-slate-400",
+  idle: "bg-highlight text-ink shadow-hard-xs",
+  selected: "bg-highlight text-ink shadow-hard-xs",
+  correct: "bg-white text-emerald-700 shadow-hard-xs",
+  wrong: "bg-white text-rose-600 shadow-hard-xs",
+  revealed: "bg-emerald-400 text-ink shadow-hard-xs",
+  muted: "bg-slate-100 text-slate-400 shadow-none",
 };
 
 interface OptionButtonProps {
@@ -67,7 +67,7 @@ export function OptionButton({ letter, label, state, disabled, onClick }: Option
 
         <kbd
           className={cn(
-            "relative shrink-0 rounded-md border border-ink px-2 py-0.5 font-sans text-xs font-black",
+            "relative grid h-8 w-8 shrink-0 place-items-center rounded-md border border-ink font-sans text-sm font-black",
             KEYCAP[state],
           )}
         >
