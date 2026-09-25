@@ -113,7 +113,7 @@ export function GameDemo() {
 
       <VictoryModal
         open={isFinished}
-        player={{ name: "Demo", avatar: "🦊" }}
+        player={{ name: "Demo", avatar: "avatar1" }}
         score={score}
         totalRounds={mockRounds.length}
         history={results.map((r, i) => ({ category: mockRounds[i].category, elapsedMs: null, correct: r.correct }))}

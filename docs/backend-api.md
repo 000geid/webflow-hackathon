@@ -101,7 +101,7 @@ De 2 a 5 jugadores juegan las mismas cinco rondas al mismo tiempo. El puntaje po
 
 Línea de tiempo de cada ronda: `startsAt` → 15 s de revelación → hasta 8 s más para responder si frenaste → `endedAt` → 4 s de resultados → siguiente ronda. La ronda cierra antes si todos respondieron. La primera arranca 3 s después de `start` (cuenta regresiva). Igual que en partidas solo, el tiempo avanza al consultar: cada request pone la sala al día.
 
-- `POST /api/rooms` con `{ "name": "Ana", "avatar": "🦊", "category": "memes" }` (`category` opcional) → `201`: `RoomView` + `token`. El avatar debe ser uno de `AVATARS` (`src/lib/game/avatars.ts`); el nombre, de 1 a 16 caracteres. Los códigos tienen 5 caracteres sin I, L, O, 0 ni 1.
+- `POST /api/rooms` con `{ "name": "Ana", "avatar": "avatar7", "category": "memes" }` (`category` opcional) → `201`: `RoomView` + `token`. El avatar debe ser uno de `AVATARS` (`src/lib/game/avatars.ts`); el nombre, de 1 a 16 caracteres. Los códigos tienen 5 caracteres sin I, L, O, 0 ni 1.
 - `POST /api/rooms/{code}/join` con el mismo cuerpo → `201`: `RoomView` + `token`. Solo en lobby y con lugar. Un nombre repetido recibe sufijo (`Ana 2`).
 - `GET /api/rooms/{code}` con `Authorization: Bearer {token}` → `RoomView`. La UI lo consulta cada ~1 s; también marca presencia (se persiste como mucho cada 4 s; sin consultas por 10 s, el jugador figura desconectado).
 - `POST /api/rooms/{code}/actions` con el Bearer token:

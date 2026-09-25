@@ -5,11 +5,11 @@ import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring, u
 import { CountUp } from "@/components/ui/CountUp";
 import { PillButton } from "@/components/ui/PillButton";
 import type { RoundHistory } from "@/lib/game/hints";
-import { avatarImageFor } from "@/lib/ui/avatar-images";
 import { copyText } from "@/lib/ui/clipboard";
 import { cn } from "@/lib/ui/cn";
 import { formatSeconds, victoryStats, victoryTitle, type VictoryTitle } from "@/lib/ui/victory";
 import type { Toast } from "./LiveToast";
+import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 
 export type RankingEntry = { id: string; name: string; avatar: string; score: number; isYou: boolean };
 
@@ -70,19 +70,12 @@ function startWaterfall(): () => void {
   };
 }
 
-/** Avatar pixel-art del jugador (elegido por su nombre) en marco retro ámbar. */
-function AvatarImage({ name, size }: { name: string; size: "md" | "sm" }) {
+/** Avatar pixel-art del jugador en marco retro ámbar. */
+function AvatarImage({ avatar, size }: { avatar: string; size: "md" | "sm" }) {
   return (
-    // Imágenes locales chicas de /public: no hace falta la optimización de next/image.
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={avatarImageFor(name)}
-      alt=""
-      draggable={false}
-      className={cn(
-        "shrink-0 rounded-none border-2 border-amber-400 object-cover shadow-[2px_2px_0px_#000]",
-        size === "md" ? "h-12 w-12" : "h-7 w-7",
-      )}
+    <PlayerAvatar
+      avatar={avatar}
+      className={cn("border-2 border-amber-400 shadow-[2px_2px_0px_#000]", size === "md" ? "h-12 w-12 text-2xl" : "h-7 w-7 text-base")}
     />
   );
 }
@@ -162,7 +155,7 @@ export function VictoryModal({
                     </div>
 
                     <div className="mt-2 flex items-center justify-center gap-3">
-                      <AvatarImage name={player.name} size="md" />
+                      <AvatarImage avatar={player.avatar} size="md" />
                       <div className="min-w-0 text-left">
                         <p className="truncate text-base font-bold text-cream">{player.name || "Jugador"}</p>
                         <p className="mt-0.5 font-pixel text-[10px] tracking-wider text-slate-500 uppercase">
@@ -203,7 +196,7 @@ export function VictoryModal({
                             <span className={cn("w-6 font-pixel text-[11px]", index === 0 ? "text-arcade" : "text-slate-500")} aria-label={`Puesto ${index + 1}`}>
                               {index + 1}º
                             </span>
-                            <AvatarImage name={entry.name} size="sm" />
+                            <AvatarImage avatar={entry.avatar} size="sm" />
                             <span className="min-w-0 flex-1 truncate text-sm font-semibold text-cream">{entry.name}</span>
                             <span className="font-pixel text-xs text-slate-300 tabular-nums">{entry.score}</span>
                           </li>
