@@ -1,6 +1,6 @@
 # Pixel Rush AI
 
-Base de una app Next.js para desplegar en Webflow Cloud. La interfaz de Gabi ya está en el repo, pero todavía muestra una ronda de prueba y no está conectada a los endpoints.
+Base de una app Next.js para desplegar en Webflow Cloud. La interfaz de Gabi ya está en el repo. Por ahora la página corre una partida de prueba en el navegador (`GameDemo`) y no está conectada a los endpoints.
 
 ## Estado
 
@@ -12,11 +12,12 @@ Base de una app Next.js para desplegar en Webflow Cloud. La interfaz de Gabi ya 
 
 ## Interfaz
 
-- Tailwind CSS v4. Los colores de marca están como tokens en `src/app/globals.css` (`bg-canvas`, `bg-brand`, `bg-success`).
-- `src/components/game/`: `GameStage` y sus piezas (`GameHeader`, `GameImage`, `GuessButton`, `OptionsGrid`, `OptionButton`). Solo pintan lo que reciben por props.
+- Tailwind CSS v4. Los colores de marca y la animación `animate-shake` están como tokens en `src/app/globals.css`.
+- Framer Motion para la entrada de las opciones, el rebote de acierto y el modal. `canvas-confetti` para el festejo final.
+- `src/components/game/`: `GameStage` y sus piezas (`GameHeader`, `GameImage`, `GuessButton`, `OptionsGrid`, `OptionButton`) y `GameResultsModal`. Solo pintan lo que reciben por props. `GameDemo` es la partida de prueba que maneja el estado.
 - `src/components/ui/`: piezas genéricas (`Badge`).
-- `src/lib/ui/`: helpers de la interfaz (niveles de blur/zoom, estado visual de cada opción).
-- `src/mocks/`: ronda de prueba mientras no hay endpoints.
+- `src/lib/ui/`: helpers de la interfaz: zoom/blur según el tiempo (`reveal.ts`), estado visual de cada opción, estrellas y precisión del resultado.
+- `src/mocks/`: cinco rondas de prueba con imágenes en `public/demo/`.
 - Las props de `GameStage` siguen los nombres de `GameView`. El mapeo está comentado en `GameStage.tsx`.
 
 ## Desarrollo

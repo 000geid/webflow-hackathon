@@ -3,12 +3,14 @@ import { Badge } from "@/components/ui/Badge";
 const LOW_TIME_THRESHOLD = 5;
 
 interface GameHeaderProps {
+  /** Segundos restantes; puede tener decimales, se muestra redondeado hacia arriba. */
   timeLeft: number;
   score: number;
 }
 
 export function GameHeader({ timeLeft, score }: GameHeaderProps) {
-  const isLowTime = timeLeft <= LOW_TIME_THRESHOLD;
+  const seconds = Math.max(0, Math.ceil(timeLeft));
+  const isLowTime = seconds <= LOW_TIME_THRESHOLD && seconds > 0;
 
   return (
     <header className="mb-5 flex items-center justify-between gap-4">
@@ -18,10 +20,10 @@ export function GameHeader({ timeLeft, score }: GameHeaderProps) {
 
       <div className="flex items-center gap-2" aria-live="polite">
         <Badge icon="⏱" tone={isLowTime ? "danger" : "brand"}>
-          {timeLeft}s
+          {seconds}s
         </Badge>
         <Badge icon="★" tone="success">
-          {score}
+          {score.toLocaleString("es-AR")}
         </Badge>
       </div>
     </header>

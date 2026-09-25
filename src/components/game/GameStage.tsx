@@ -1,4 +1,8 @@
+"use client";
+
+import { AnimatePresence } from "framer-motion";
 import type { Choice } from "@/lib/game/types";
+import { ROUND_DURATION_MS } from "@/lib/game/rules";
 import { GameHeader } from "./GameHeader";
 import { GameImage } from "./GameImage";
 import { GuessButton } from "./GuessButton";
@@ -7,31 +11,31 @@ import { OptionsGrid } from "./OptionsGrid";
 /**
  * Los nombres siguen a `GameView` (src/lib/game/types.ts) para que conectar
  * la respuesta del servidor sea directo:
- *   imageUrl    ← view.round.imageUrl
- *   category    ← view.round.category
- *   choices     ← view.round.choices   (vacío hasta pausar)
- *   score       ← view.score
- *   showOptions ← view.status === "paused" || view.status === "answered" || view.status === "finished"
+ *   imageUrl  ← view.round.imageUrl
+ *   category  ← view.round.category
+ *   choices   ← view.round.choices   (vacío hasta pausar)
+ *   score     ← view.score
+ *   timeLeft  ← (view.round.deadline - ahora) / 1000
+ *   isPaused  ← view.status === "paused"
  *   selectedChoiceId / correctChoiceId ← view.round.result
  */
 export interface GameStageProps {
   imageUrl: string | null;
   category?: string;
-  /** Segundos que quedan, ya redondeados. */
+  /** Segundos restantes. Puede tener decimales para que el zoom sea suave. */
   timeLeft: number;
+  /** Duración total de la ronda en segundos. */
+  duration?: number;
   score: number;
-  /** 0–7: de scale-100 a scale-300 */
-  zoomLevel?: number;
-  /** 0–7: de blur-none a blur-3xl */
-  blurLevel?: number;
-  /** true = muestra la grilla 2x2 y oculta el botón ADIVINAR */
-  showOptions?: boolean;
+  /** true = tiempo frenado, se ven las opciones y el botón dice REANUDAR. */
+  isPaused?: boolean;
+  /** true = ronda cerrada (respondida o sin tiempo): nada se puede tocar. */
+  isLocked?: boolean;
   choices?: Choice[];
   selectedChoiceId?: string | null;
   correctChoiceId?: string | null;
-  /** ADIVINAR = acción "pause" del motor */
   onGuess?: () => void;
-  /** Elegir opción = acción "answer" del motor */
+  onResume?: () => void;
   onSelectChoice?: (choiceId: string) => void;
 }
 
@@ -40,16 +44,20 @@ export function GameStage({
   imageUrl,
   category,
   timeLeft,
+  duration = ROUND_DURATION_MS / 1000,
   score,
-  zoomLevel = 0,
-  blurLevel = 0,
-  showOptions = false,
+  isPaused = false,
+  isLocked = false,
   choices = [],
   selectedChoiceId = null,
   correctChoiceId = null,
   onGuess,
+  onResume,
   onSelectChoice,
 }: GameStageProps) {
+  const isRevealed = correctChoiceId !== null;
+  const showOptions = isPaused || isRevealed;
+
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-10">
       <section className="w-full max-w-2xl">
@@ -58,20 +66,30 @@ export function GameStage({
         <GameImage
           src={imageUrl}
           alt={category ? `Imagen a adivinar: ${category}` : "Imagen a adivinar"}
-          zoomLevel={zoomLevel}
-          blurLevel={blurLevel}
+          timeLeft={timeLeft}
+          duration={duration}
+          revealed={isRevealed}
         />
 
-        {showOptions ? (
-          <OptionsGrid
-            choices={choices}
-            selectedChoiceId={selectedChoiceId}
-            correctChoiceId={correctChoiceId}
-            onSelect={onSelectChoice}
-          />
-        ) : (
-          <GuessButton onClick={onGuess} />
-        )}
+        <GuessButton
+          isPaused={isPaused}
+          disabled={isLocked}
+          onGuess={onGuess}
+          onResume={onResume}
+        />
+
+        <AnimatePresence>
+          {showOptions && choices.length > 0 && (
+            <OptionsGrid
+              key="options"
+              choices={choices}
+              selectedChoiceId={selectedChoiceId}
+              correctChoiceId={correctChoiceId}
+              locked={isLocked}
+              onSelect={onSelectChoice}
+            />
+          )}
+        </AnimatePresence>
       </section>
     </main>
   );
