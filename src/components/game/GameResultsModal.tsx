@@ -43,7 +43,7 @@ export function GameResultsModal({ open, score, maxScore, correctCount, totalRou
       {open && (
         <motion.div
           key="backdrop"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 px-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
