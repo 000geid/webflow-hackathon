@@ -2,10 +2,10 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { GameConflict } from "../src/lib/game/engine";
 import {
-  addPlayer, ANSWER_WINDOW_MS, applyRoomAction, COUNTDOWN_MS, createRoomState, MAX_PLAYERS,
-  restartRoom, REVEAL_MS, roomView, syncRoom, type RoomState,
+  addPlayer, applyRoomAction, COUNTDOWN_MS, createRoomState, GUESS_DURATION_MS,
+  MAX_PLAYERS, restartRoom, REVEAL_MS, roomView, syncRoom, type RoomState,
 } from "../src/lib/game/room";
-import { ROUND_DURATION_MS } from "../src/lib/game/rules";
+import { ROUND_DURATION_MS, pointsAt } from "../src/lib/game/rules";
 import type { RoundContent } from "../src/lib/game/types";
 
 const content = (): RoundContent[] => Array.from({ length: 5 }, (_, i) => ({
@@ -13,136 +13,123 @@ const content = (): RoundContent[] => Array.from({ length: 5 }, (_, i) => ({
   choices: [{ id: "A", label: "Yes" }, { id: "B", label: "No" }], correctChoiceId: "A",
 }));
 const player = (id: string, name = id) => ({ id, name, avatar: "🦊", tokenHash: `hash-${id}` });
-
 function room(): RoomState {
   const state = createRoomState("fixture", content(), player("host", "Ana"), 0);
   addPlayer(state, player("p2", "Diego"), 0);
   return state;
 }
 
-test("lobby: host only starts with 2+, names deduplicated, room caps at 5", () => {
-  const solo = createRoomState("fixture", content(), player("host", "Ana"), 0);
-  assert.throws(() => applyRoomAction(solo, "host", { type: "start" }, 0), GameConflict);
-  assert.equal(addPlayer(solo, player("p2", "ana"), 0), "ana 2");
-  assert.throws(() => applyRoomAction(solo, "p2", { type: "start" }, 0), GameConflict);
-  for (let i = 3; i <= MAX_PLAYERS; i++) addPlayer(solo, player(`p${i}`), 0);
-  assert.throws(() => addPlayer(solo, player("extra"), 0), GameConflict);
-  applyRoomAction(solo, "host", { type: "start" }, 1000);
-  assert.throws(() => addPlayer(solo, player("late"), 1000), GameConflict);
+test("lobby, host permissions, ready check and capacity", () => {
+  const state = createRoomState("fixture", content(), player("host", "Ana"), 0);
+  assert.throws(() => applyRoomAction(state, "host", { type: "start" }, 0), GameConflict);
+  assert.equal(addPlayer(state, player("p2", "ana"), 0), "ana 2");
+  assert.throws(() => applyRoomAction(state, "p2", { type: "start" }, 0), GameConflict);
+  for (let i = 3; i <= MAX_PLAYERS; i++) addPlayer(state, player(`p${i}`), 0);
+  assert.throws(() => addPlayer(state, player("extra"), 0), GameConflict);
+  const ready = room();
+  applyRoomAction(ready, "host", { type: "ready", ready: true }, 10);
+  assert.equal(ready.status, "lobby");
+  applyRoomAction(ready, "p2", { type: "ready", ready: true }, 20);
+  assert.equal(ready.status, "playing");
 });
 
-test("leaving the lobby hands the host role to the next player", () => {
-  const state = room();
-  applyRoomAction(state, "host", { type: "leave" }, 10);
-  assert.equal(state.hostId, "p2");
-  assert.equal(state.players.length, 1);
-});
-
-test("shared round: countdown, per-player scoring, early close when everyone answered", () => {
+test("first pause wins and only that player sees the choices", () => {
   const state = room();
   applyRoomAction(state, "host", { type: "start" }, 0);
-  const startsAt = COUNTDOWN_MS;
-  assert.equal(roomView("CODE", state, "host", 0).round?.status, "countdown");
-  assert.throws(() => applyRoomAction(state, "host", { type: "pause", roundIndex: 0 }, 100), GameConflict);
+  const start = COUNTDOWN_MS;
+  assert.throws(() => applyRoomAction(state, "host", { type: "pause", roundIndex: 0 }, start - 1), GameConflict);
+  applyRoomAction(state, "host", { type: "pause", roundIndex: 0 }, start + 2_000);
+  assert.equal(state.round?.guesserId, "host");
+  assert.equal(state.round?.remainingMs, 13_000);
+  assert.throws(() => applyRoomAction(state, "p2", { type: "pause", roundIndex: 0 }, start + 2_001), GameConflict);
+  assert.deepEqual(roomView("CODE", state, "p2", start + 2_001).round?.choices, []);
+  assert.deepEqual(roomView("CODE", state, "host", start + 2_001).round?.choices.map((choice) => choice.id), ["A", "B"]);
+  applyRoomAction(state, "host", { type: "answer", roundIndex: 0, choiceId: "A" }, start + 2_500);
+  assert.equal(state.round?.winnerId, "host");
+  assert.equal(roomView("CODE", state, "host", start + 2_500).score, pointsAt(2_000));
+  assert.equal(roomView("CODE", state, "p2", start + 2_500).roundResults[0], false);
+});
 
-  applyRoomAction(state, "host", { type: "pause", roundIndex: 0 }, startsAt + 2000);
-  // Frenar no revela la respuesta a nadie.
-  assert.equal(JSON.stringify(roomView("CODE", state, "p2", startsAt + 2000)).includes("correctChoiceId"), false);
-  assert.equal(roomView("CODE", state, "p2", startsAt + 2000).players.find((p) => p.id === "host")?.status, "guessing");
+test("wrong answer consumes the attempt and resumes the shared clock", () => {
+  const state = room();
+  applyRoomAction(state, "host", { type: "start" }, 0);
+  const start = COUNTDOWN_MS;
+  applyRoomAction(state, "host", { type: "pause", roundIndex: 0 }, start + 2_000);
+  applyRoomAction(state, "host", { type: "answer", roundIndex: 0, choiceId: "B" }, start + 2_500);
+  assert.equal(state.round?.revealStartedAt, start + 2_500);
+  assert.equal(state.round?.remainingMs, 13_000);
+  assert.throws(() => applyRoomAction(state, "host", { type: "pause", roundIndex: 0 }, start + 3_000), GameConflict);
+  applyRoomAction(state, "p2", { type: "pause", roundIndex: 0 }, start + 4_000);
+  applyRoomAction(state, "p2", { type: "answer", roundIndex: 0, choiceId: "A" }, start + 4_200);
+  assert.equal(roomView("CODE", state, "p2", start + 4_200).score, pointsAt(3_500));
+  assert.equal(state.round?.winnerId, "p2");
+});
 
-  applyRoomAction(state, "host", { type: "answer", roundIndex: 0, choiceId: "A" }, startsAt + 5000);
-  assert.equal(roomView("CODE", state, "host", startsAt + 5000).score, 880); // frenó a los 2 s
-  assert.equal(state.round?.endedAt, null);
+test("five-second answer window expires and another player can try", () => {
+  const state = room();
+  applyRoomAction(state, "host", { type: "start" }, 0);
+  const start = COUNTDOWN_MS;
+  applyRoomAction(state, "host", { type: "pause", roundIndex: 0 }, start + 1_000);
+  syncRoom(state, start + 1_000 + GUESS_DURATION_MS);
+  assert.equal(state.round?.guesserId, null);
+  assert.equal(state.round?.remainingMs, 14_000);
+  assert.equal(roomView("CODE", state, "host", start + 6_000).round?.hasAttempted, true);
+  applyRoomAction(state, "p2", { type: "pause", roundIndex: 0 }, start + 6_100);
+  applyRoomAction(state, "p2", { type: "answer", roundIndex: 0, choiceId: "A" }, start + 6_200);
+  assert.equal(state.round?.winnerId, "p2");
+});
 
-  applyRoomAction(state, "p2", { type: "pause", roundIndex: 0 }, startsAt + 8000);
-  applyRoomAction(state, "p2", { type: "answer", roundIndex: 0, choiceId: "B" }, startsAt + 9000);
-  assert.equal(state.round?.endedAt, startsAt + 9000);
-  assert.equal(roomView("CODE", state, "p2", startsAt + 9000).round?.status, "ended");
-
-  syncRoom(state, startsAt + 9000 + REVEAL_MS);
+test("all wrong closes the round; idle rooms finish; rematch resets scores", () => {
+  const state = room();
+  applyRoomAction(state, "host", { type: "start" }, 0);
+  const start = COUNTDOWN_MS;
+  applyRoomAction(state, "host", { type: "pause", roundIndex: 0 }, start + 1_000);
+  applyRoomAction(state, "host", { type: "answer", roundIndex: 0, choiceId: "B" }, start + 1_500);
+  applyRoomAction(state, "p2", { type: "pause", roundIndex: 0 }, start + 2_000);
+  applyRoomAction(state, "p2", { type: "answer", roundIndex: 0, choiceId: "B" }, start + 2_500);
+  assert.equal(state.round?.endedAt, start + 2_500);
+  assert.equal(roomView("CODE", state, "host", start + 2_500).round?.result?.correctChoiceId, "A");
+  syncRoom(state, start + 2_500 + REVEAL_MS);
   assert.equal(state.round?.index, 1);
-  assert.equal(state.round?.startsAt, startsAt + 9000 + REVEAL_MS);
-  assert.deepEqual(state.events.map((e) => e.kind), ["joined", "started", "guessing", "correct", "guessing", "wrong"]);
-});
-
-test("timeouts: never paused loses at 15s, paused-but-silent loses at the answer window", () => {
-  const state = room();
-  applyRoomAction(state, "host", { type: "start" }, 0);
-  const startsAt = COUNTDOWN_MS;
-  applyRoomAction(state, "host", { type: "pause", roundIndex: 0 }, startsAt + 1000);
-  syncRoom(state, startsAt + ROUND_DURATION_MS);
-  assert.equal(roomView("CODE", state, "p2", startsAt + ROUND_DURATION_MS).players.find((p) => p.id === "p2")?.status, "timeout");
-  assert.equal(state.round?.endedAt, null);
-  syncRoom(state, startsAt + ROUND_DURATION_MS + ANSWER_WINDOW_MS);
-  assert.equal(state.round?.endedAt, startsAt + ROUND_DURATION_MS + ANSWER_WINDOW_MS);
-});
-
-test("an idle room catches up through every round and finishes; host can rematch", () => {
-  const state = room();
-  applyRoomAction(state, "host", { type: "start" }, 0);
+  assert.equal(state.round?.remainingMs, ROUND_DURATION_MS);
   syncRoom(state, 10 * 60_000);
   assert.equal(state.status, "finished");
-  assert.deepEqual(roomView("CODE", state, "host", 10 * 60_000).roundResults, [false, false, false, false, false]);
   assert.throws(() => restartRoom(state, "p2", content(), 10 * 60_000), GameConflict);
   restartRoom(state, "host", content(), 10 * 60_000);
   assert.equal(state.status, "lobby");
   assert.equal(roomView("CODE", state, "host", 10 * 60_000).score, 0);
 });
 
-test("streaks count trailing correct answers", () => {
+test("hints remain private while the buzzer is free", () => {
   const state = room();
   applyRoomAction(state, "host", { type: "start" }, 0);
-  for (let i = 0; i < 3; i++) {
-    const startsAt = state.round!.startsAt;
-    for (const id of ["host", "p2"]) {
-      applyRoomAction(state, id, { type: "pause", roundIndex: i }, startsAt + 1000);
-      applyRoomAction(state, id, { type: "answer", roundIndex: i, choiceId: id === "host" || i === 2 ? "A" : "B" }, startsAt + 1000);
-    }
-    syncRoom(state, state.round!.endedAt! + REVEAL_MS);
-  }
-  const players = roomView("CODE", state, "host", state.round!.startsAt).players;
-  assert.equal(players.find((p) => p.id === "host")?.streak, 3);
-  assert.equal(players.find((p) => p.id === "p2")?.streak, 1);
-  assert.equal(players[0].id, "host"); // ordenado por puntaje
+  const start = COUNTDOWN_MS;
+  applyRoomAction(state, "host", { type: "hint", roundIndex: 0 }, start + 100);
+  assert.equal(roomView("CODE", state, "host", start + 100).round?.hint, "1 palabra · Y__");
+  assert.equal(roomView("CODE", state, "p2", start + 100).round?.hint, null);
+  applyRoomAction(state, "p2", { type: "pause", roundIndex: 0 }, start + 200);
+  assert.equal(roomView("CODE", state, "host", start + 201).round?.choices.length, 0);
 });
 
-test("room hints: one per player, private to that player, announced to the room", () => {
+test("leaving during play transfers the host without deleting the score", () => {
   const state = room();
   applyRoomAction(state, "host", { type: "start" }, 0);
-  const startsAt = COUNTDOWN_MS;
-  assert.throws(() => applyRoomAction(state, "host", { type: "hint", roundIndex: 0 }, 100), GameConflict);
-  applyRoomAction(state, "host", { type: "hint", roundIndex: 0 }, startsAt + 500);
-  assert.equal(roomView("CODE", state, "host", startsAt + 500).round?.hint, "1 palabra · Y__");
-  assert.equal(roomView("CODE", state, "p2", startsAt + 500).round?.hint, null);
-  assert.equal(roomView("CODE", state, "p2", startsAt + 500).hintsLeft, 1);
-  assert.equal(state.events.at(-1)?.kind, "hint");
-  applyRoomAction(state, "host", { type: "pause", roundIndex: 0 }, startsAt + 1000);
-  applyRoomAction(state, "host", { type: "answer", roundIndex: 0, choiceId: "A" }, startsAt + 1200);
-  assert.deepEqual(roomView("CODE", state, "host", startsAt + 1200).history, [{ category: "test", elapsedMs: 1000, correct: true }]);
+  applyRoomAction(state, "host", { type: "pause", roundIndex: 0 }, COUNTDOWN_MS + 100);
+  applyRoomAction(state, "host", { type: "answer", roundIndex: 0, choiceId: "A" }, COUNTDOWN_MS + 200);
+  const score = roomView("CODE", state, "host", COUNTDOWN_MS + 200).score;
+  applyRoomAction(state, "host", { type: "leave" }, COUNTDOWN_MS + 300);
+  assert.equal(state.hostId, "p2");
+  assert.equal(roomView("CODE", state, "host", COUNTDOWN_MS + 300).score, score);
 });
 
-test("ready check: auto-start only when 2+ players are all ready; host can force; rematch resets", () => {
-  const state = createRoomState("fixture", content(), player("host", "Ana"), 0, "memes");
-  applyRoomAction(state, "host", { type: "ready", ready: true }, 10);
-  assert.equal(state.status, "lobby"); // solo: no arranca
-  addPlayer(state, player("p2", "Diego"), 20);
-  addPlayer(state, player("p3", "Lu"), 20);
-  applyRoomAction(state, "p2", { type: "ready", ready: true }, 30);
-  assert.equal(roomView("CODE", state, "p3", 30).readyCount, 2);
-  applyRoomAction(state, "p2", { type: "ready", ready: false }, 40);
-  applyRoomAction(state, "p2", { type: "ready", ready: true }, 50);
-  assert.equal(state.status, "lobby");
-  applyRoomAction(state, "p3", { type: "leave" }, 60); // se va el único que faltaba
-  assert.equal(state.status, "playing");
-  assert.equal(roomView("CODE", state, "host", 60).category.label, "Memes de Internet");
-  assert.ok(state.players.every((p) => !p.ready));
-
-  const forced = room();
-  assert.throws(() => applyRoomAction(forced, "p2", { type: "start" }, 0), GameConflict);
-  applyRoomAction(forced, "host", { type: "start" }, 0); // nadie confirmó, el anfitrión fuerza
-  assert.equal(forced.status, "playing");
-  syncRoom(forced, 10 * 60_000);
-  applyRoomAction(forced, "p2", { type: "ready", ready: true }, 10 * 60_000); // fuera del lobby: no hace nada
-  restartRoom(forced, "host", content(), 10 * 60_000);
-  assert.equal(roomView("CODE", forced, "host", 10 * 60_000).readyCount, 0);
+test("leaving during an answer turn releases the buzzer immediately", () => {
+  const state = room();
+  applyRoomAction(state, "host", { type: "start" }, 0);
+  applyRoomAction(state, "host", { type: "pause", roundIndex: 0 }, COUNTDOWN_MS + 100);
+  applyRoomAction(state, "host", { type: "leave" }, COUNTDOWN_MS + 200);
+  assert.equal(state.hostId, "p2");
+  assert.equal(state.round?.guesserId, null);
+  assert.equal(roomView("CODE", state, "host", COUNTDOWN_MS + 200).round?.hasAttempted, true);
+  applyRoomAction(state, "p2", { type: "pause", roundIndex: 0 }, COUNTDOWN_MS + 300);
+  assert.equal(state.round?.guesserId, "p2");
 });

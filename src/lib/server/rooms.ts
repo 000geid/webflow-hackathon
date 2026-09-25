@@ -11,6 +11,7 @@ import { createGameState } from "./challenges";
 import { database, hash } from "./games";
 
 const ROOM_TTL_MS = 6 * 60 * 60 * 1000;
+const ACTIVE_HOST_MS = 15_000;
 /* Sin I, L, O, 0 ni 1: se confunden al dictar el código en voz alta. */
 const CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 const CODE_LENGTH = 5;
@@ -105,6 +106,11 @@ export async function accessRoom(request: Request, code: string, action?: RoomRe
     const player = state.players.find((p) => p.tokenHash === tokenHash);
     if (!player) throw new ApiError(404, "PLAYER_NOT_FOUND", "No estás en esta sala.");
     touchPlayer(state, player.id, now);
+    const host = state.players.find((p) => p.id === state.hostId);
+    if (!host || now - host.lastSeen >= ACTIVE_HOST_MS) {
+      const successor = state.players.find((p) => now - p.lastSeen < ACTIVE_HOST_MS);
+      if (successor) state.hostId = successor.id;
+    }
     if (action?.type === "rematch") restartRoom(state, player.id, rematch!.content, now);
     else if (action) applyRoomAction(state, player.id, action, now);
     return player.id;

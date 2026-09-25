@@ -60,10 +60,9 @@ export function GameClient({ onExit, onFinished, notify, player = { name: "", av
   const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [clock, setClock] = useState(Date.now());
+  const [clock, setClock] = useState(0);
   const [serverOffset, setServerOffset] = useState(0);
   const expiringRound = useRef<string | null>(null);
-  const initialized = useRef(false);
   const reportedGame = useRef<string | null>(null);
 
   const acceptView = useCallback((next: GameView) => {
@@ -98,36 +97,37 @@ export function GameClient({ onExit, onFinished, notify, player = { name: "", av
   }, [acceptView]);
 
   useEffect(() => {
-    if (initialized.current) return;
-    initialized.current = true;
-    const saved = readSession();
-    if (!saved) {
-      void createAndStart();
-      return;
-    }
-    setToken(saved.token);
-    setBusy(true);
-    void gameRequest(`/api/games/${saved.gameId}`, saved.token)
-      .then(async (restored) => {
-        let current = restored as GameView;
-        if (current.status === "ready") {
-          current = await gameRequest(`/api/games/${saved.gameId}/actions`, saved.token, {
-            type: "start",
-            roundIndex: current.roundIndex,
-          }) as GameView;
-        }
-        acceptView(current);
-      })
-      .catch((cause: unknown) => {
-        const status = (cause as { status?: number })?.status;
-        if (status === 401 || status === 404) {
-          sessionStorage.removeItem(SESSION_KEY);
-          void createAndStart();
-          return;
-        }
-        setError(cause instanceof Error ? cause.message : "No se pudo recuperar la partida.");
-      })
-      .finally(() => setBusy(false));
+    const timer = window.setTimeout(() => {
+      const saved = readSession();
+      if (!saved) {
+        void createAndStart();
+        return;
+      }
+      setToken(saved.token);
+      setBusy(true);
+      void gameRequest(`/api/games/${saved.gameId}`, saved.token)
+        .then(async (restored) => {
+          let current = restored as GameView;
+          if (current.status === "ready") {
+            current = await gameRequest(`/api/games/${saved.gameId}/actions`, saved.token, {
+              type: "start",
+              roundIndex: current.roundIndex,
+            }) as GameView;
+          }
+          acceptView(current);
+        })
+        .catch((cause: unknown) => {
+          const status = (cause as { status?: number })?.status;
+          if (status === 401 || status === 404) {
+            sessionStorage.removeItem(SESSION_KEY);
+            void createAndStart();
+            return;
+          }
+          setError(cause instanceof Error ? cause.message : "No se pudo recuperar la partida.");
+        })
+        .finally(() => setBusy(false));
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [acceptView, createAndStart]);
 
   useEffect(() => {
