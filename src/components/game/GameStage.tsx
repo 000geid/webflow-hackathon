@@ -1,8 +1,9 @@
 "use client";
 
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, MotionConfig } from "framer-motion";
 import type { Choice } from "@/lib/game/types";
 import { ROUND_DURATION_MS, ROUNDS_PER_GAME } from "@/lib/game/rules";
+import { CardDeck } from "./CardDeck";
 import { GameHeader } from "./GameHeader";
 import { GameImage } from "./GameImage";
 import { GuessButton } from "./GuessButton";
@@ -68,44 +69,49 @@ export function GameStage({
   const showOptions = isPaused || isRevealed;
 
   return (
-    <main className="flex min-h-screen items-start justify-center px-4 py-8 sm:items-center sm:py-12">
-      <section className="w-full max-w-2xl">
-        <GameHeader
-          timeLeft={timeLeft}
-          score={score}
-          roundIndex={roundIndex}
-          totalRounds={totalRounds}
-          results={results}
-        />
+    // reducedMotion="user": si la persona pidió menos movimiento, se respeta.
+    <MotionConfig reducedMotion="user">
+      <main className="flex min-h-screen items-start justify-center overflow-x-clip px-4 py-8 sm:py-14">
+        <section className="w-full max-w-2xl">
+          <GameHeader
+            timeLeft={timeLeft}
+            score={score}
+            roundIndex={roundIndex}
+            totalRounds={totalRounds}
+            results={results}
+          />
 
-        <GameImage
-          src={imageUrl}
-          alt={category ? `Imagen a adivinar: ${category}` : "Imagen a adivinar"}
-          timeLeft={timeLeft}
-          duration={duration}
-          revealed={isRevealed}
-        />
-
-        <GuessButton
-          isPaused={isPaused}
-          disabled={isLocked}
-          onGuess={onGuess}
-          onResume={onResume}
-        />
-
-        <AnimatePresence>
-          {showOptions && choices.length > 0 && (
-            <OptionsGrid
-              key="options"
-              choices={choices}
-              selectedChoiceId={selectedChoiceId}
-              correctChoiceId={correctChoiceId}
-              locked={isLocked}
-              onSelect={onSelectChoice}
+          <CardDeck cardKey={roundIndex} roundIndex={roundIndex} totalRounds={totalRounds}>
+            <GameImage
+              src={imageUrl}
+              alt={category ? `Imagen a adivinar: ${category}` : "Imagen a adivinar"}
+              timeLeft={timeLeft}
+              duration={duration}
+              revealed={isRevealed}
             />
-          )}
-        </AnimatePresence>
-      </section>
-    </main>
+          </CardDeck>
+
+          <GuessButton
+            isPaused={isPaused}
+            disabled={isLocked}
+            onGuess={onGuess}
+            onResume={onResume}
+          />
+
+          <AnimatePresence>
+            {showOptions && choices.length > 0 && (
+              <OptionsGrid
+                key="options"
+                choices={choices}
+                selectedChoiceId={selectedChoiceId}
+                correctChoiceId={correctChoiceId}
+                locked={isLocked}
+                onSelect={onSelectChoice}
+              />
+            )}
+          </AnimatePresence>
+        </section>
+      </main>
+    </MotionConfig>
   );
 }

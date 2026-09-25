@@ -14,7 +14,7 @@ Base de una app Next.js para desplegar en Webflow Cloud. La interfaz de Gabi ya 
 
 - Tailwind CSS v4. Los colores de marca y la animación `animate-shake` están como tokens en `src/app/globals.css`.
 - Framer Motion para la entrada de las opciones, el rebote de acierto y el modal. `canvas-confetti` para el festejo final.
-- `src/components/game/`: `GameStage` y sus piezas (`GameHeader`, `GameImage`, `GuessButton`, `OptionsGrid`, `OptionButton`) y `GameResultsModal`. Solo pintan lo que reciben por props. `GameDemo` es la partida de prueba que maneja el estado.
+- `src/components/game/`: `GameStage` y sus piezas (`GameHeader`, `ProgressBar`, `CardDeck`, `CardBack`, `GameImage`, `GuessButton`, `OptionsGrid`, `OptionButton`) y `GameResultsModal`. Solo pintan lo que reciben por props. `GameDemo` es la partida de prueba que maneja el estado.
 - `src/components/ui/`: piezas genéricas (`Badge`).
 - `src/lib/ui/`: helpers de la interfaz: zoom/blur según el tiempo (`reveal.ts`), estado visual de cada opción, estrellas y precisión del resultado.
 - `src/mocks/`: cinco rondas de prueba con imágenes en `public/demo/`.

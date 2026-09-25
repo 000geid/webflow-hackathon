@@ -23,14 +23,9 @@ export function GameHeader({ timeLeft, score, roundIndex, totalRounds, results }
       <ProgressBar totalRounds={totalRounds} roundIndex={roundIndex} results={results} />
 
       <div className="flex items-center justify-between gap-3">
-        <div className="leading-none">
-          <p className="text-xl font-black tracking-tight sm:text-2xl">
-            Pixel <span className="text-brand">Rush</span>
-          </p>
-          <p className="mt-1 text-xs font-extrabold tracking-widest text-slate-400 uppercase">
-            Ronda {roundIndex + 1} de {totalRounds}
-          </p>
-        </div>
+        <p className="text-xl leading-none font-black tracking-tight sm:text-2xl">
+          Pixel <span className="text-brand">Rush</span>
+        </p>
 
         <div className="flex items-center gap-2" aria-live="polite">
           <Badge

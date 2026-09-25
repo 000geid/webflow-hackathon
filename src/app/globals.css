@@ -2,7 +2,7 @@
 
 /* Tokens de Pixel Rush. Se usan como clases: bg-canvas, text-brand, animate-shake… */
 @theme {
-  --color-canvas: #f1f5f9;
+  --color-canvas: #f8fafc;
   --color-ink: #0f172a;
   --color-brand: #2563eb;
   --color-brand-hover: #1d4ed8;
@@ -21,9 +21,7 @@
   }
 }
 
-/* Fondo: gris frío suave con una grilla de puntos muy sutil. */
+/* Fondo ultra limpio para que las cartas resalten. */
 body {
   @apply bg-canvas font-sans text-ink antialiased;
-  background-image: radial-gradient(circle, rgb(15 23 42 / 0.07) 1px, transparent 1px);
-  background-size: 22px 22px;
 }
