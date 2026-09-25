@@ -1,5 +1,5 @@
-import { GameClient } from "@/components/game";
+import { PixelRushApp } from "@/components/app/PixelRushApp";
 
 export default function Home() {
-  return <GameClient />;
+  return <PixelRushApp />;
 }

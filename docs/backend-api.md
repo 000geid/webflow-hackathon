@@ -78,3 +78,39 @@ npm run test:api
 La conexión Webflow MCP pertenece a la sesión de desarrollo; no suministra automáticamente credenciales al proceso Next.js. El 25/09/2026 se verificó por MCP que `Challenges` tiene el esquema esperado. Se importaron cinco desafíos desde `content/challenges-memes-dev.csv`. La importación dejó vacíos categoría, opciones y respuesta correcta; esos campos se corrigieron después mediante MCP. Las correcciones se publicaron usando la Data API porque la acción de publicar del conector fue rechazada por validación de esquema. Se verificaron cinco ítems completos en `/items/live` y una partida HTTP de cinco rondas con 5000 puntos. En producción, configurar `GAME_CONTENT_MODE=webflow`, `WEBFLOW_SITE_TOKEN` y `WEBFLOW_COLLECTION_ID` como variables/secretos de Webflow Cloud. No copiar credenciales de producción a `.env.local`.
 
 Antes de desplegar: configurar el binding real de SQLite y aplicar la migración en Cloud, cargar/publicar cinco desafíos y guardar el Site Token como secreto. El ID de base en `wrangler.json` es un placeholder local. No se implementó limpieza periódica de partidas vencidas, rate limiting ni IA todavía.
+
+## Categorías
+
+`GET /api/categories` devuelve cada categoría (`mix`, `pop-arg`, `cine-series`, `memes`, `deportes`, `tech`) con `count` de desafíos y `available` (hacen falta cinco). `POST /api/games` y `POST /api/rooms` aceptan `category` opcional (por defecto `mix`); si la categoría no tiene cinco desafíos responde `409 INSUFFICIENT_CHALLENGES`. La lista y los alias viven en `src/lib/game/categories.ts`. En modo `fixture` no se filtra: todas figuran disponibles con las formas de prueba.
+
+## Puntaje
+
+Una respuesta correcta vale `pointsAt(elapsedMs)` (`src/lib/game/rules.ts`): baja en línea recta de 1.000 puntos al segundo 0 a 100 al segundo 15 (por ejemplo, frenar a los 2 s vale 880). `elapsedMs` es el tiempo hasta que el jugador frenó, no hasta que respondió. Incorrecta o sin tiempo: 0. La UI muestra ese mismo valor en vivo con la misma función, así el medidor nunca promete algo distinto a lo que se cobra.
+
+## Pista (power-up)
+
+`{ "type": "hint", "roundIndex": 0 }` en `/actions` (partidas y salas): una pista por partida por jugador, solo con la ronda en curso y sin responder. Repetirla en la misma ronda es idempotente; pedirla en otra ronda responde `409`. La vista trae `hintsLeft` y `round.hint` (solo para quien la pidió, solo en esa ronda). En salas se emite el evento `hint` para avisar al resto, sin revelar el texto.
+
+La pista actual no usa IA: `maskedHint()` (`src/lib/game/hints.ts`) enmascara la respuesta correcta (`"3 palabras · D____ H______ B___"`). Para conectar un agente (Webflow MCP u otro proveedor), generar el texto en el servidor al procesar la acción `hint`, guardarlo en el estado de la ronda y devolverlo en `round.hint`; la UI no cambia (entra por `onFetchAIHint` en `GameStage`).
+
+Las vistas también traen `history`: por cada ronda terminada, categoría, `elapsedMs` hasta frenar (null si no frenó) y acierto. Lo usa la tarjeta final.
+
+# API de salas (multijugador)
+
+De 2 a 5 jugadores juegan las mismas cinco rondas al mismo tiempo. El puntaje por ronda es el mismo que en partidas solo (`scoreForAnswer`). La lógica está en `src/lib/game/room.ts` (pura, con tests en `tests/room.test.ts`) y la persistencia en `src/lib/server/rooms.ts`, tabla `rooms` (`migrations/0002_rooms.sql`). La sala vence a las 6 horas.
+
+Línea de tiempo de cada ronda: `startsAt` → 15 s de revelación → hasta 8 s más para responder si frenaste → `endedAt` → 4 s de resultados → siguiente ronda. La ronda cierra antes si todos respondieron. La primera arranca 3 s después de `start` (cuenta regresiva). Igual que en partidas solo, el tiempo avanza al consultar: cada request pone la sala al día.
+
+- `POST /api/rooms` con `{ "name": "Ana", "avatar": "🦊", "category": "memes" }` (`category` opcional) → `201`: `RoomView` + `token`. El avatar debe ser uno de `AVATARS` (`src/lib/game/avatars.ts`); el nombre, de 1 a 16 caracteres. Los códigos tienen 5 caracteres sin I, L, O, 0 ni 1.
+- `POST /api/rooms/{code}/join` con el mismo cuerpo → `201`: `RoomView` + `token`. Solo en lobby y con lugar. Un nombre repetido recibe sufijo (`Ana 2`).
+- `GET /api/rooms/{code}` con `Authorization: Bearer {token}` → `RoomView`. La UI lo consulta cada ~1 s; también marca presencia (se persiste como mucho cada 4 s; sin consultas por 10 s, el jugador figura desconectado).
+- `POST /api/rooms/{code}/actions` con el Bearer token:
+  - `{ "type": "ready", "ready": true }` — solo en el lobby. Cuando hay 2+ jugadores y todos están listos, la partida arranca sola (evento `ready`, luego `started`). Si se va el único que faltaba, también arranca.
+  - `{ "type": "start" }` — solo anfitrión, con 2+ jugadores: fuerza el inicio aunque falte confirmar.
+  - `{ "type": "pause", "roundIndex": 0 }` y `{ "type": "answer", "roundIndex": 0, "choiceId": "A" }` — igual que en partidas solo.
+  - `{ "type": "rematch" }` — solo anfitrión, con la partida terminada: vuelve al lobby con rondas nuevas.
+  - `{ "type": "leave" }` — en el lobby quita al jugador (el anfitrión pasa al siguiente); durante la partida queda como desconectado. Responde `{ "left": true }`.
+
+`RoomView.events` trae los últimos 20 eventos (`joined`, `left`, `started`, `guessing`, `correct`, `wrong`, `rematch`) con `seq` creciente para los avisos en vivo. Las opciones y la respuesta correcta de una ronda solo se envían a quien ya frenó o cuando la ronda terminó; el estado `correct`/`wrong` de los demás sí es visible en vivo.
+
+En Webflow Cloud hay que aplicar la migración `0002_rooms.sql` a la base D1 antes de usar salas.

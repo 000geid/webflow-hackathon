@@ -2,43 +2,50 @@
 
 import type { ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { CardBack } from "./CardBack";
+import { categoryInfo, categoryOf } from "@/lib/game/categories";
+import { cn } from "@/lib/ui/cn";
+import { getProgressSegments, type SegmentState } from "@/lib/ui/progress";
 
-/* Punto de partida de la carta nueva: viene del mazo de la derecha. */
-const ENTER = { x: "18%", rotate: 6, scale: 0.9, opacity: 0 };
-/* Posición final en el centro. */
-const CENTER = { x: 0, rotate: 0, scale: 1, opacity: 1 };
-/* Salida: se desliza hacia la izquierda como una carta descartada. */
-const EXIT = { x: "-130%", rotate: -14, opacity: 0 };
+/* La carta nueva entra desde la derecha y la anterior sale hacia la izquierda. */
+const ENTER = { x: 32, opacity: 0, rotate: 1.5 };
+const CENTER = { x: 0, opacity: 1, rotate: 0 };
+const EXIT = { x: -32, opacity: 0, rotate: -1.5 };
 
-const SPRING = { type: "spring", stiffness: 300, damping: 20 } as const;
+const SPRING = { type: "spring", stiffness: 420, damping: 34 } as const;
+
+const DOT: Record<SegmentState, string> = {
+  correct: "bg-mint",
+  wrong: "bg-coral",
+  current: "bg-slate-900",
+  upcoming: "bg-paper",
+};
 
 interface CardDeckProps {
-  /** Cambia en cada ronda: dispara la animación de swipe. */
+  /** Cambia en cada ronda: dispara la transición. */
   cardKey: string | number;
   roundIndex: number;
   totalRounds: number;
+  /** Resultado de las rondas ya jugadas (true = acierto), para los puntos de la cabecera. */
+  results: boolean[];
+  /** Categoría de la ronda. */
+  label?: string;
+  /** Últimos segundos: la sombra se vuelve coral y el punto actual late. */
+  tense?: boolean;
   children: ReactNode;
 }
 
-/**
- * Mazo de cartas: una carta activa al centro y dos asomando atrás.
- * La carta de la derecha muestra el dorso con el logo.
- */
-export function CardDeck({ cardKey, roundIndex, totalRounds, children }: CardDeckProps) {
+/** Nombre con emoji si la categoría es una de las conocidas ("Pelis & Series" → "🍿 Pelis & Series"). */
+function categoryBadge(label: string) {
+  const id = categoryOf(label);
+  return id ? `${categoryInfo(id).emoji} ${categoryInfo(id).label}` : label;
+}
+
+/** Carta coleccionable: cabecera crema con categoría y ronda, y la imagen como ilustración. */
+export function CardDeck({ cardKey, roundIndex, totalRounds, results, label, tense = false, children }: CardDeckProps) {
+  const segments = getProgressSegments(totalRounds, roundIndex, results);
+
   return (
     <div className="relative mx-auto w-full">
-      {/* Cartas de fondo (decorativas) */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 -translate-x-[9%] translate-y-2 scale-90 -rotate-6">
-          <div className="h-full w-full rounded-2xl border-3 border-ink bg-highlight shadow-hard-lg" />
-        </div>
-        <div className="absolute inset-0 translate-x-[9%] translate-y-2 scale-90 rotate-6">
-          <CardBack />
-        </div>
-      </div>
-
-      {/* Carta activa */}
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.div
           key={cardKey}
@@ -46,20 +53,35 @@ export function CardDeck({ cardKey, roundIndex, totalRounds, children }: CardDec
           animate={CENTER}
           exit={EXIT}
           transition={SPRING}
-          className="relative rounded-2xl border-3 border-ink bg-white p-3 shadow-hard-lg sm:p-4"
+          className={cn(
+            "relative overflow-hidden rounded-3xl border-3 border-slate-900 bg-paper transition-shadow duration-300",
+            tense ? "shadow-[6px_6px_0px_0px_#FF8A65]" : "shadow-[6px_6px_0px_0px_#0F172A]",
+          )}
         >
-          <div className="flex items-center justify-between px-0.5 pb-3">
-            <p className="text-xs font-black tracking-widest text-ink uppercase">
-              Ronda {roundIndex + 1} de {totalRounds}
-            </p>
-            {/* Tres "píxeles" decorativos, estilo etiqueta suiza */}
-            <span aria-hidden="true" className="flex gap-1">
-              <span className="h-2.5 w-2.5 border-2 border-ink bg-brand" />
-              <span className="h-2.5 w-2.5 border-2 border-ink bg-highlight" />
-              <span className="h-2.5 w-2.5 border-2 border-ink bg-white" />
-            </span>
+          <div className="flex items-center justify-between gap-3 border-b-3 border-slate-900 bg-cream px-3 py-2.5 sm:px-4">
+            {label && (
+              <p className="min-w-0 truncate rounded-full border-2 border-slate-900 bg-peach px-3 py-1 text-xs font-black tracking-wide text-slate-950 uppercase">
+                {categoryBadge(label)}
+              </p>
+            )}
+            <div className="ml-auto flex shrink-0 items-center gap-3">
+              <span className="hidden items-center gap-1 sm:flex" aria-hidden="true">
+                {segments.map((state, i) => (
+                  <span
+                    key={i}
+                    className={cn(
+                      "h-2.5 w-2.5 rounded-full border-2 border-slate-900",
+                      tense && state === "current" ? "animate-pulse bg-coral" : DOT[state],
+                    )}
+                  />
+                ))}
+              </span>
+              <p className="font-mono text-xs font-black tracking-wider text-slate-900 uppercase">
+                Ronda {roundIndex + 1}/{totalRounds}
+              </p>
+            </div>
           </div>
-          {children}
+          <div className="p-2.5 sm:p-3">{children}</div>
         </motion.div>
       </AnimatePresence>
     </div>

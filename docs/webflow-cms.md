@@ -10,7 +10,7 @@ La colección fue creada mediante Webflow MCP el 25 de septiembre de 2026. Su es
 | Nombre | `name` | Texto | Identificador legible para editores |
 | Slug | `slug` | Texto | URL/identificador en Webflow |
 | Imagen | `imagen` | Imagen | Imagen que se revela durante la ronda |
-| Categoría | `categoria` | Texto | Etiqueta de categoría |
+| Categoría | `categoria` | Texto | Una de: `Logos & Tech`, `Cultura Arg`, `Pelis & Series`, `Memes de Internet`, `Fútbol` (acepta alias, ver `src/lib/game/categories.ts`). Cada categoría necesita 5 desafíos activos para poder elegirse |
 | Opción A | `opcion-a` | Texto | Respuesta visible |
 | Opción B | `opcion-b` | Texto | Respuesta visible |
 | Opción C | `opcion-c` | Texto | Respuesta visible |

@@ -1,3 +1,5 @@
+import type { RoundHistory } from "./hints";
+
 export type Choice = { id: string; label: string };
 export type RoundContent = {
   id: string;
@@ -16,12 +18,15 @@ export type GameState = {
   mode: "fixture" | "webflow";
   index: number;
   rounds: RoundState[];
+  /** Ronda en la que se usó la pista (una por partida). Opcional: partidas viejas no lo tienen. */
+  hintRound?: number | null;
 };
 export type GameAction =
   | { type: "start"; roundIndex: number }
   | { type: "pause"; roundIndex: number }
   | { type: "expire"; roundIndex: number }
-  | { type: "answer"; roundIndex: number; choiceId: string };
+  | { type: "answer"; roundIndex: number; choiceId: string }
+  | { type: "hint"; roundIndex: number };
 
 export type GameView = {
   gameId: string;
@@ -32,6 +37,9 @@ export type GameView = {
   score: number;
   /** Resultado de cada ronda completada; las futuras todavía son null. */
   roundResults: (boolean | null)[];
+  /** Rondas ya terminadas: categoría, tiempo hasta frenar y acierto. */
+  history: RoundHistory[];
+  hintsLeft: number;
   serverNow: number;
   round: {
     imageUrl: string;
@@ -41,5 +49,7 @@ export type GameView = {
     elapsedMs: number;
     choices: Choice[];
     result: { choiceId: string | null; correctChoiceId: string; points: number } | null;
+    /** Pista de esta ronda, si la pediste en esta ronda. */
+    hint: string | null;
   };
 };

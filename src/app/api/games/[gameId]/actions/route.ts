@@ -8,6 +8,7 @@ const schema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("pause"), roundIndex }).strict(),
   z.object({ type: z.literal("expire"), roundIndex }).strict(),
   z.object({ type: z.literal("answer"), roundIndex, choiceId: z.string().min(1).max(64) }).strict(),
+  z.object({ type: z.literal("hint"), roundIndex }).strict(),
 ]);
 export async function POST(request: Request, context: { params: Promise<{ gameId: string }> }) {
   try {

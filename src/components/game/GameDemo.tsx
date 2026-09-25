@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ROUND_DURATION_MS, scoreForAnswer } from "@/lib/game/rules";
 import { mockRounds } from "@/mocks/game";
-import { GameResultsModal } from "./GameResultsModal";
+import { VictoryModal } from "./VictoryModal";
 import { GameStage } from "./GameStage";
 
 const TICK_MS = 100;
@@ -113,12 +113,15 @@ export function GameDemo() {
         onSelectChoice={handleSelect}
       />
 
-      <GameResultsModal
+      <VictoryModal
         open={isFinished}
+        player={{ name: "Demo", avatar: "🦊" }}
         score={score}
         maxScore={mockRounds.length * MAX_POINTS_PER_ROUND}
-        correctCount={results.filter((r) => r.correct).length}
         totalRounds={mockRounds.length}
+        history={results.map((r, i) => ({ category: mockRounds[i].category, elapsedMs: null, correct: r.correct }))}
+        hintsUsed={0}
+        edition="Demo"
         onPlayAgain={handlePlayAgain}
       />
     </>
