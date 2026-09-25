@@ -38,6 +38,8 @@ export interface GameStageProps {
   isPaused?: boolean;
   /** true = ronda cerrada (respondida o sin tiempo): nada se puede tocar. */
   isLocked?: boolean;
+  /** La API de partidas no permite reanudar después de pausar. */
+  canResume?: boolean;
   choices?: Choice[];
   selectedChoiceId?: string | null;
   correctChoiceId?: string | null;
@@ -58,6 +60,7 @@ export function GameStage({
   results = [],
   isPaused = false,
   isLocked = false,
+  canResume = true,
   choices = [],
   selectedChoiceId = null,
   correctChoiceId = null,
@@ -94,6 +97,7 @@ export function GameStage({
           <GuessButton
             isPaused={isPaused}
             disabled={isLocked}
+            canResume={canResume}
             onGuess={onGuess}
             onResume={onResume}
           />

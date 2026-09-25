@@ -30,6 +30,8 @@ export type GameView = {
   roundIndex: number;
   totalRounds: number;
   score: number;
+  /** Resultado de cada ronda completada; las futuras todavía son null. */
+  roundResults: (boolean | null)[];
   serverNow: number;
   round: {
     imageUrl: string;

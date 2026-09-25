@@ -7,6 +7,17 @@ import { ApiError } from "./api";
 import { getWebflowCollectionItems } from "./webflow";
 
 const labels = ["Círculo", "Triángulo", "Cuadrado", "Estrella", "Corazón"];
+function configuredMode(): GameState["mode"] {
+  const mode = process.env.GAME_CONTENT_MODE ?? (process.env.NODE_ENV === "production" ? "webflow" : "fixture");
+  if (mode !== "fixture" && mode !== "webflow") {
+    throw new ApiError(503, "INVALID_CONTENT_MODE", "GAME_CONTENT_MODE debe ser fixture o webflow.");
+  }
+  if (process.env.NODE_ENV === "production" && mode !== "webflow") {
+    throw new ApiError(503, "FIXTURES_DISABLED", "Producción debe usar contenido de Webflow.");
+  }
+  return mode;
+}
+
 function fixtures(): RoundContent[] {
   return labels.map((label, index) => ({
     id: `fixture-${index}`, category: "Demo · Formas",
@@ -17,10 +28,10 @@ function fixtures(): RoundContent[] {
   }));
 }
 
-export async function createGameState(mode: GameState["mode"]): Promise<GameState> {
+export async function createGameState(): Promise<GameState> {
+  const mode = configuredMode();
   let content: RoundContent[];
   if (mode === "fixture") {
-    if (process.env.NODE_ENV === "production") throw new ApiError(403, "FIXTURES_DISABLED", "El modo demo solo está disponible en desarrollo.");
     content = fixtures();
   } else {
     if (!process.env.WEBFLOW_SITE_TOKEN || !process.env.WEBFLOW_COLLECTION_ID) {
