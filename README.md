@@ -1,10 +1,11 @@
 # Pixel Rush AI
 
-App Next.js para Webflow Cloud. La pantalla principal consume los endpoints de partidas y presenta imágenes de la fuente configurada en el servidor.
+App Next.js para Webflow Cloud. La pantalla principal permite jugar solo o crear una sala para 2 a 5 personas. En salas, la primera persona que pausa la imagen gana el turno para responder; si falla, el reloj continúa para los demás.
 
 ## Backend disponible
 
 - `GET /api/health`.
+- `POST /api/rooms`, `POST /api/rooms/{code}/join`, `GET /api/rooms/{code}` y `POST /api/rooms/{code}/actions` para salas con código, turnos de respuesta, puntajes y revancha.
 - `POST /api/games`: crear una partida de cinco rondas.
 - `GET /api/games/{gameId}`: recuperar estado y expirar rondas vencidas.
 - `POST /api/games/{gameId}/actions`: iniciar, pausar, responder y expirar.
@@ -18,7 +19,7 @@ Esquema del CMS: [docs/webflow-cms.md](docs/webflow-cms.md).
 
 - Tailwind CSS v4. Los colores de marca y la animación `animate-shake` están como tokens en `src/app/globals.css`.
 - Framer Motion para la entrada de las opciones, el rebote de acierto y el modal. `canvas-confetti` para el festejo final.
-- `src/components/game/`: `GameClient` conecta la interfaz a la API; `GameStage` y sus piezas (`GameHeader`, `ProgressBar`, `CardDeck`, `CardBack`, `GameImage`, `GuessButton`, `OptionsGrid`, `OptionButton`) y `GameResultsModal` presentan el estado.
+- `src/components/app/PixelRushApp.tsx` coordina el lobby, la sala y el modo individual. `src/components/room/RoomClient.tsx` consulta la sala y conecta las acciones al servidor. `src/components/game/` contiene el escenario y sus piezas visuales.
 - `src/components/ui/`: piezas genéricas (`Badge`).
 - `src/lib/ui/`: helpers de la interfaz: zoom/blur según el tiempo (`reveal.ts`), estado visual de cada opción, estrellas y precisión del resultado.
 - `src/mocks/` y `public/demo/`: contenido de prueba usado por `GameDemo`; la página principal usa el contenido del servidor.
