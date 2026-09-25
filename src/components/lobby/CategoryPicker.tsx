@@ -37,7 +37,7 @@ export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
 
   return (
     <fieldset className="mt-4">
-      <legend className="px-1 pb-2 font-mono text-[11px] font-semibold tracking-wider text-slate-500 uppercase">Categoría</legend>
+      <legend className="px-1 pb-2 font-pixel text-[10px] tracking-wider text-slate-500 uppercase">Categoría</legend>
       <div className="grid grid-cols-2 gap-1.5" role="radiogroup" aria-label="Categoría">
         {OPTIONS.map((option) => {
           const info = availability?.get(option.id);
@@ -53,24 +53,24 @@ export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
               disabled={disabled}
               onClick={() => onChange(option.id)}
               className={cn(
-                "flex min-w-0 cursor-pointer items-center gap-2 rounded-full border-2 px-3 py-2 text-left text-[13px] font-bold",
-                "transition-[translate,box-shadow,background-color] duration-100 enabled:active:translate-y-0.5",
-                "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600",
+                "flex min-w-0 cursor-pointer items-center gap-2 border-2 px-2.5 py-2 text-left text-[13px] font-bold",
+                "transition-[translate,box-shadow,background-color,border-color] duration-100 enabled:active:translate-x-0.5 enabled:active:translate-y-0.5",
+                "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neon-bright",
                 disabled
-                  ? "cursor-not-allowed border-slate-300 bg-white text-slate-400"
+                  ? "cursor-not-allowed border-edge bg-panel-deep text-slate-600"
                   : selected
-                    ? "border-slate-950 bg-blue-600 text-white shadow-[2px_2px_0px_0px_#020617]"
-                    : "border-slate-950 bg-white text-slate-950 hover:bg-slate-50",
+                    ? "border-black bg-neon text-crt shadow-[3px_3px_0px_0px_#000,0_0_14px_rgb(16_185_129/0.35)]"
+                    : "border-edge-soft bg-crt text-slate-200 hover:border-neon",
               )}
             >
               <span className="text-base leading-none" aria-hidden="true">{option.emoji}</span>
               <span className="min-w-0 flex-1 truncate">{option.label}</span>
-              {disabled && <span className="rounded-full bg-slate-100 px-1.5 py-0.5 font-mono text-[9px] tracking-wider text-slate-500 uppercase">Pronto</span>}
+              {disabled && <span className="border border-edge px-1 py-0.5 font-pixel text-[8px] tracking-wider text-slate-500 uppercase">Pronto</span>}
             </button>
           );
         })}
       </div>
-      <p className="mt-2 px-1 text-xs font-medium text-slate-600" aria-live="polite">
+      <p className="mt-2 px-1 text-xs text-slate-400" aria-live="polite">
         {OPTIONS.find((option) => option.id === value)?.description}
       </p>
     </fieldset>

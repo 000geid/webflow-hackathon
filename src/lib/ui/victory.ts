@@ -26,28 +26,30 @@ export function victoryStats(history: RoundHistory[], totalRounds: number): Vict
 }
 
 export type VictoryTitle = {
-  emoji: string;
   title: string;
   tagline: string;
   rarity: "Legendaria" | "Épica" | "Rara" | "Común";
-  /** Detalle visual opcional junto al título. */
-  accent?: "blue-dot";
 };
 
-/** Puntaje como fracción del máximo a partir del cual se considera alto o medio. */
-export const HIGH_SCORE_RATIO = 0.7;
-export const MEDIUM_SCORE_RATIO = 0.35;
+/** Promedio hasta frenar por debajo del cual se considera "rápido", y desde el cual "colgado". */
+export const FAST_AVERAGE_MS = 4_000;
+export const SLOW_AVERAGE_MS = 10_000;
 
 /**
- * Título de la tarjeta. El orden importa: gana la primera regla que se cumple.
- * Usar la pista pesa más que el puntaje (es el título más gracioso y el más honesto).
+ * Rango de la tarjeta final según precisión y velocidad. Gana la primera regla que se cumple:
+ *   1. GOAT          — 80 % o más.
+ *   2. ¡CRACK!       — 40–60 % y rápido (promedio < 4 s).
+ *   3. EN NARNIA     — 20 % o menos, o demasiado lento (≥ 10 s de promedio, o nunca frenó).
+ *   4. MEDIA PILAAA  — el resto (40–60 % a ritmo normal).
  */
-export function victoryTitle({ score, maxScore, hintsUsed }: { score: number; maxScore: number; hintsUsed: number }): VictoryTitle {
-  const ratio = maxScore > 0 ? score / maxScore : 0;
-  if (hintsUsed > 0) return { emoji: "🤖", title: "Más bot que humano", tagline: "La pista hizo la mitad del laburo.", rarity: "Rara" };
-  if (ratio >= HIGH_SCORE_RATIO) return { emoji: "👑", title: "La / El GOAT", tagline: "Nadie te frena. Literal.", rarity: "Legendaria" };
-  if (ratio >= MEDIUM_SCORE_RATIO) return { emoji: "🧠", title: "Megamente", tagline: "Cerebro a full, reflejos en camino.", rarity: "Épica", accent: "blue-dot" };
-  return { emoji: "🐌", title: "El / La colgado/a", tagline: "Te tomaste tu tiempo… demasiado.", rarity: "Común" };
+export function victoryTitle({ accuracy, averageMs }: Pick<VictoryStats, "accuracy" | "averageMs">): VictoryTitle {
+  const tooSlow = averageMs === null || averageMs >= SLOW_AVERAGE_MS;
+  if (accuracy >= 80) return { title: "GOAT", tagline: "Mirá esa precisión... ¡cero fallas, la cazaste al toque!", rarity: "Legendaria" };
+  if (accuracy >= 40 && averageMs !== null && averageMs < FAST_AVERAGE_MS) {
+    return { title: "¡CRACK!", tagline: "Casi perfecto. Bajale un cambio a la ansiedad para la próxima.", rarity: "Épica" };
+  }
+  if (accuracy <= 20 || tooSlow) return { title: "EN NARNIA", tagline: "Te colgaste mal. ¡Te la llevás a marzo!", rarity: "Común" };
+  return { title: "MEDIA PILAAA", tagline: "Adivinaste un par de pedo. Tenés que ajustar el ojo.", rarity: "Rara" };
 }
 
 export const formatSeconds = (ms: number | null) => (ms === null ? "—" : `${(ms / 1000).toFixed(1).replace(".", ",")} s`);

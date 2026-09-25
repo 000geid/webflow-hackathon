@@ -8,7 +8,6 @@ import { GameStage } from "./GameStage";
 
 const TICK_MS = 100;
 const NEXT_ROUND_DELAY_MS = 1800;
-const MAX_POINTS_PER_ROUND = scoreForAnswer(0, true);
 
 type RoundResult = { correct: boolean; points: number };
 
@@ -102,7 +101,6 @@ export function GameDemo() {
         score={score}
         roundIndex={roundIndex}
         totalRounds={mockRounds.length}
-        results={results.map((r) => r.correct)}
         isPaused={isPaused}
         isLocked={isLocked || isFinished}
         choices={round.choices}
@@ -117,10 +115,8 @@ export function GameDemo() {
         open={isFinished}
         player={{ name: "Demo", avatar: "🦊" }}
         score={score}
-        maxScore={mockRounds.length * MAX_POINTS_PER_ROUND}
         totalRounds={mockRounds.length}
         history={results.map((r, i) => ({ category: mockRounds[i].category, elapsedMs: null, correct: r.correct }))}
-        hintsUsed={0}
         edition="Demo"
         onPlayAgain={handlePlayAgain}
       />

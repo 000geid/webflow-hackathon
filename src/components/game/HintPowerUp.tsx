@@ -5,15 +5,15 @@ import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/ui/cn";
 
 /*
- * Textos del power-up. Hoy la pista sale de una regla (máscara de la respuesta), no de una IA:
- * cuando el backend conecte un agente, cambiar estas etiquetas junto con la fuente de la pista.
+ * Textos del power-up. Hoy la pista sale de una regla (máscara de la respuesta), no de una IA
+ * ni del MCP: cuando el backend conecte un agente, cambiar estas etiquetas junto con la fuente.
  */
 const BUTTON_LABEL = "Pista";
 const USED_LABEL = "Usada";
 
 function BulbIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.25} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={className}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="square" strokeLinejoin="miter" aria-hidden="true" className={className}>
       <path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1.1 2V16h5v-.2c.1-.8.5-1.5 1.1-2A6 6 0 0 0 12 3Z" />
     </svg>
   );
@@ -25,7 +25,7 @@ interface HintButtonProps {
   onClick: () => void;
 }
 
-/** Píldora manteca junto a ADIVINAR. El número indica cuántas pistas quedan en la partida. */
+/** Botón de arcade ámbar junto a ADIVINAR. El número indica cuántas pistas quedan en la partida. */
 export function HintButton({ hintsLeft, disabled, onClick }: HintButtonProps) {
   const available = hintsLeft > 0;
   return (
@@ -35,19 +35,19 @@ export function HintButton({ hintsLeft, disabled, onClick }: HintButtonProps) {
       disabled={disabled || !available}
       aria-label={available ? `Pedir pista (quedan ${hintsLeft})` : "Pista usada"}
       className={cn(
-        "inline-flex h-14 shrink-0 cursor-pointer items-center gap-2 rounded-full border-2 px-4 text-sm font-black tracking-wider uppercase sm:px-5",
+        "inline-flex h-14 shrink-0 cursor-pointer items-center gap-2 border-2 px-4 font-pixel text-sm tracking-wide uppercase sm:px-5",
         "transition-[translate,box-shadow,background-color] duration-100",
-        "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-slate-900",
+        "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-arcade-bright",
         available
-          ? "border-slate-950 bg-butter text-slate-950 shadow-[4px_4px_0px_0px_#0F172A] enabled:hover:bg-[#FDE68A] enabled:active:translate-y-1 enabled:active:shadow-none disabled:cursor-not-allowed disabled:opacity-60"
-          : "cursor-default border-slate-300 bg-line text-slate-500",
+          ? "border-black bg-[#F59E0B] text-black shadow-pixel enabled:hover:translate-x-[-2px] enabled:hover:translate-y-[-2px] enabled:hover:bg-arcade-bright enabled:active:translate-x-0.5 enabled:active:translate-y-0.5 enabled:active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+          : "cursor-default border-edge bg-panel text-slate-500",
         available && !disabled && "motion-safe:animate-glow",
       )}
     >
       {available ? <BulbIcon className="h-5 w-5" /> : <span aria-hidden="true">✓</span>}
       <span className="hidden sm:inline">{available ? BUTTON_LABEL : USED_LABEL}</span>
       {available && (
-        <span className="grid h-6 min-w-6 place-items-center rounded-full bg-slate-900 px-1.5 font-mono text-[11px] text-butter" aria-hidden="true">
+        <span className="grid h-5 min-w-5 place-items-center bg-black px-1 font-pixel text-[10px] text-arcade-bright" aria-hidden="true">
           {hintsLeft}
         </span>
       )}
@@ -80,21 +80,21 @@ export function HintBox({ text }: { text: string }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -6, rotate: -0.6 }}
-      animate={{ opacity: 1, y: 0, rotate: 0 }}
+      initial={{ opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -6 }}
-      className="mt-4 flex items-start gap-3 rounded-2xl border-2 border-slate-900 bg-butter p-3 shadow-[3px_3px_0px_0px_#0F172A]"
+      className="mt-4 flex items-start gap-3 border-2 border-arcade bg-arcade/10 p-3 shadow-pixel"
       role="status"
       aria-label={`Pista: ${text}`}
     >
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-slate-900 text-butter" aria-hidden="true">
+      <span className="grid h-9 w-9 shrink-0 place-items-center border-2 border-black bg-arcade text-black" aria-hidden="true">
         <BulbIcon className="h-4.5 w-4.5" />
       </span>
       <div className="min-w-0 pt-0.5">
-        <p className="font-mono text-[10px] font-bold tracking-wider text-slate-900/60 uppercase">Tu pista</p>
-        <p className="mt-0.5 font-mono text-base font-bold break-words whitespace-pre-wrap text-slate-950" aria-hidden="true">
+        <p className="font-pixel text-[10px] tracking-wider text-arcade uppercase">Tu pista</p>
+        <p className="mt-1 font-mono text-base font-bold break-words whitespace-pre-wrap text-arcade-bright" aria-hidden="true">
           {shown}
-          {!done && <span className="ml-0.5 inline-block h-4 w-2 translate-y-0.5 animate-pulse bg-slate-900" />}
+          {!done && <span className="ml-0.5 inline-block h-4 w-2 translate-y-0.5 animate-pulse bg-arcade-bright" />}
         </p>
       </div>
     </motion.div>

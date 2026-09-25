@@ -2,39 +2,34 @@ import type { PlayerStatus, RoomPlayerView } from "@/lib/game/room";
 import { cn } from "@/lib/ui/cn";
 
 const STATUS: Record<PlayerStatus, { label: string; chip: string }> = {
-  waiting: { label: "Listo", chip: "bg-cream text-slate-500" },
-  revealing: { label: "Mirando", chip: "bg-cream text-slate-600" },
-  guessing: { label: "Pensando…", chip: "bg-butter text-slate-950 ring-1 ring-slate-900" },
-  correct: { label: "¡Adivinó!", chip: "bg-mint text-slate-950 ring-1 ring-slate-900" },
-  wrong: { label: "Falló", chip: "bg-coral text-slate-950 ring-1 ring-slate-900" },
-  timeout: { label: "Sin tiempo", chip: "bg-cream text-slate-400" },
+  waiting: { label: "Listo", chip: "border-edge text-slate-400" },
+  revealing: { label: "Mirando", chip: "border-edge text-slate-300" },
+  guessing: { label: "Pensando", chip: "border-black bg-arcade text-black" },
+  correct: { label: "¡Adivinó!", chip: "border-black bg-neon text-black" },
+  wrong: { label: "Falló", chip: "border-black bg-hot text-black" },
+  timeout: { label: "Sin tiempo", chip: "border-edge text-slate-500" },
 };
 
 function Avatar({ player, size }: { player: RoomPlayerView; size: "sm" | "md" }) {
   return (
     <span
       className={cn(
-        "relative grid shrink-0 place-items-center rounded-full border-2 border-slate-900 bg-cream",
+        "relative grid shrink-0 place-items-center border-2 bg-crt",
         size === "md" ? "h-10 w-10 text-xl" : "h-7 w-7 text-base",
-        player.status === "guessing" && "ring-2 ring-butter ring-offset-2 ring-offset-slate-900",
+        player.status === "guessing" ? "border-arcade shadow-[0_0_12px_rgb(245_158_11/0.55)]" : "border-edge",
       )}
       aria-hidden="true"
     >
       {player.avatar}
-      <span
-        className={cn(
-          "absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2 border-white",
-          player.online ? "bg-emerald-500" : "bg-slate-300",
-        )}
-      />
+      <span className={cn("absolute -right-1 -bottom-1 h-2.5 w-2.5 border-2 border-crt", player.online ? "bg-neon" : "bg-slate-600")} />
     </span>
   );
 }
 
 function StatusChip({ player }: { player: RoomPlayerView }) {
-  const status = player.online ? STATUS[player.status] : { label: "Desconectado", chip: "bg-cream text-slate-400" };
+  const status = player.online ? STATUS[player.status] : { label: "Offline", chip: "border-edge text-slate-600" };
   return (
-    <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 font-mono text-[10px] leading-4 font-semibold tracking-wide uppercase", status.chip)}>
+    <span className={cn("inline-flex items-center border px-1.5 py-0.5 font-pixel text-[9px] leading-none tracking-wide uppercase", status.chip)}>
       {status.label}
     </span>
   );
@@ -42,56 +37,53 @@ function StatusChip({ player }: { player: RoomPlayerView }) {
 
 /**
  * Tabla de la sala: puesto, avatar, estado en vivo, puntaje y racha.
- * Desktop: columna izquierda. Mobile: fila de cápsulas con scroll horizontal.
+ * Desktop: columna izquierda. Mobile: fila de fichas con scroll horizontal.
  */
 export function PlayersPanel({ players, maxPlayers }: { players: RoomPlayerView[]; maxPlayers: number }) {
   return (
     <>
       {/* Mobile */}
-      <ul className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 lg:hidden" aria-label="Jugadores">
+      <ul className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-2 lg:hidden" aria-label="Jugadores">
         {players.map((player) => (
           <li
             key={player.id}
-            className={cn(
-              "flex shrink-0 items-center gap-2 rounded-full border-2 border-slate-900 py-1 pr-3 pl-1",
-              player.isYou ? "bg-peach" : "bg-paper",
-            )}
+            className={cn("flex shrink-0 items-center gap-2 border-2 bg-panel py-1 pr-2.5 pl-1 shadow-pixel-sm", player.isYou ? "border-neon" : "border-edge")}
           >
             <Avatar player={player} size="sm" />
-            <span className="max-w-20 truncate text-xs font-bold">{player.isYou ? "Vos" : player.name}</span>
-            <span className="font-mono text-xs font-semibold tabular-nums">{player.score.toLocaleString("es-AR")}</span>
+            <span className="max-w-20 truncate text-xs font-bold text-slate-100">{player.isYou ? "Vos" : player.name}</span>
+            <span className="font-pixel text-xs text-emerald-400 tabular-nums">{player.score}</span>
             <StatusChip player={player} />
           </li>
         ))}
       </ul>
 
       {/* Desktop */}
-      <section className="hidden overflow-hidden rounded-3xl border-2 border-slate-900 bg-paper shadow-[4px_4px_0px_0px_#0F172A] lg:block">
-        <div className="flex items-center justify-between border-b-2 border-slate-900 bg-cream px-4 py-3">
-          <h2 className="font-mono text-[11px] font-bold tracking-wider text-slate-900 uppercase">
-            Tabla · {players.length}/{maxPlayers}
+      <section className="hidden border-2 border-edge bg-panel shadow-pixel lg:block">
+        <div className="flex items-center justify-between border-b-2 border-edge bg-panel-deep px-3 py-2.5">
+          <h2 className="font-pixel text-[11px] tracking-wider text-cream uppercase">
+            Tabla {players.length}/{maxPlayers}
           </h2>
-          <span className="flex items-center gap-1.5 font-mono text-[10px] font-bold tracking-wider text-[#C2410C] uppercase">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-coral" aria-hidden="true" />
-            En vivo
+          <span className="flex items-center gap-1.5 font-pixel text-[10px] tracking-wider text-hot uppercase">
+            <span className="h-1.5 w-1.5 animate-pulse bg-hot" aria-hidden="true" />
+            Live
           </span>
         </div>
-        <ol className="divide-y-2 divide-line">
+        <ol className="divide-y-2 divide-edge">
           {players.map((player, index) => (
-            <li key={player.id} className={cn("flex items-center gap-3 px-4 py-3", player.isYou && "bg-peach/50")}>
-              <span className="w-3 font-mono text-[11px] font-black text-slate-900 tabular-nums">{index + 1}</span>
+            <li key={player.id} className={cn("flex items-center gap-3 px-3 py-3", player.isYou && "bg-neon/[0.07]")}>
+              <span className={cn("w-4 font-pixel text-xs", index === 0 ? "text-arcade" : "text-slate-500")}>{index + 1}</span>
               <Avatar player={player} size="md" />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm leading-tight font-bold text-slate-950">
+                <p className="truncate text-sm leading-tight font-bold text-slate-100">
                   {player.name}
-                  {player.isYou && <span className="ml-1 font-mono text-[10px] font-medium text-slate-400">VOS</span>}
+                  {player.isYou && <span className="ml-1 font-pixel text-[9px] text-neon">VOS</span>}
                 </p>
-                <div className="mt-1 flex items-center gap-1.5">
+                <div className="mt-1.5 flex items-center gap-1.5">
                   <StatusChip player={player} />
-                  {player.streak >= 2 && <span className="font-mono text-[10px] font-bold tracking-wide text-orange-600 uppercase">Racha {player.streak}</span>}
+                  {player.streak >= 2 && <span className="font-pixel text-[9px] tracking-wide text-arcade uppercase">Racha {player.streak}</span>}
                 </div>
               </div>
-              <span className="font-mono text-sm font-bold text-slate-950 tabular-nums">{player.score.toLocaleString("es-AR")}</span>
+              <span className="font-pixel text-sm text-emerald-400 tabular-nums [text-shadow:0_0_8px_currentColor]">{player.score}</span>
             </li>
           ))}
         </ol>

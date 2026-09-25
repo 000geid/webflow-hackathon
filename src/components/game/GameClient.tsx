@@ -5,7 +5,6 @@ import { GameStage } from "@/components/game/GameStage";
 import { ROUND_DURATION_MS } from "@/lib/game/rules";
 import type { GameView } from "@/lib/game/types";
 import type { CategoryChoice } from "@/lib/game/categories";
-import { HINTS_PER_GAME } from "@/lib/game/hints";
 import type { GameSummary } from "@/lib/ui/achievements";
 import type { Toast } from "./LiveToast";
 import { VictoryModal } from "./VictoryModal";
@@ -192,14 +191,13 @@ export function GameClient({ onExit, onFinished, notify, player = { name: "", av
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
         <p aria-live="polite">{error ?? (busy ? "Cargando memes…" : "Preparando partida…")}</p>
-        {error && <button className="rounded-xl bg-brand px-5 py-3 font-bold text-white" onClick={() => void createAndStart()}>Reintentar</button>}
+        {error && <button className="border-2 border-black bg-neon px-5 py-3 font-pixel text-sm text-crt uppercase shadow-pixel" onClick={() => void createAndStart()}>Reintentar</button>}
       </main>
     );
   }
 
   const selectedChoiceId = view.round.result?.choiceId ?? null;
   const correctChoiceId = view.round.result?.correctChoiceId ?? null;
-  const results = view.roundResults.filter((result): result is boolean => result !== null);
 
   return (
     <>
@@ -211,7 +209,6 @@ export function GameClient({ onExit, onFinished, notify, player = { name: "", av
         score={view.score}
         roundIndex={view.roundIndex}
         totalRounds={view.totalRounds}
-        results={results}
         isPaused={view.status === "paused"}
         isLocked={busy || view.status === "answered" || view.status === "finished"}
         canResume={false}
@@ -230,7 +227,7 @@ export function GameClient({ onExit, onFinished, notify, player = { name: "", av
         }}
       />
       {(error || busy) && (
-        <p className={`mx-auto -mt-8 mb-6 w-full max-w-2xl px-4 text-center text-sm font-semibold ${error ? "text-red-700" : "text-slate-500"}`} aria-live="polite">
+        <p className={`mx-auto -mt-8 mb-6 w-full max-w-2xl px-4 text-center text-sm font-semibold ${error ? "text-hot" : "text-slate-500"}`} aria-live="polite">
           {error ?? "Actualizando…"}
         </p>
       )}
@@ -238,10 +235,8 @@ export function GameClient({ onExit, onFinished, notify, player = { name: "", av
         open={view.status === "finished"}
         player={player}
         score={view.score}
-        maxScore={view.totalRounds * 1000}
         totalRounds={view.totalRounds}
         history={view.history}
-        hintsUsed={HINTS_PER_GAME - view.hintsLeft}
         edition="Solo"
         onPlayAgain={() => void createAndStart()}
         onExit={onExit}

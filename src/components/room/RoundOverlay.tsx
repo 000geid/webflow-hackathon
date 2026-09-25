@@ -14,19 +14,19 @@ export function RoundOverlay(props: RoundOverlayProps) {
       {props.kind === "countdown" && (
         <motion.div
           key="countdown"
-          className="absolute inset-0 grid place-items-center rounded-2xl bg-slate-900/80 backdrop-blur-sm"
+          className="absolute inset-0 z-10 grid place-items-center bg-crt/85 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          <div className="text-center text-white">
-            <p className="font-mono text-xs tracking-[0.25em] text-slate-300 uppercase">La ronda arranca en</p>
+          <div className="text-center">
+            <p className="font-pixel text-xs tracking-widest text-slate-300 uppercase">Ronda en</p>
             <motion.p
               key={props.seconds}
               initial={{ scale: 1.4, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: "spring", stiffness: 500, damping: 30 }}
-              className="mt-2 font-mono text-7xl font-black text-butter tabular-nums sm:text-8xl"
+              className="mt-3 font-pixel text-7xl text-arcade tabular-nums [text-shadow:0_0_24px_currentColor] sm:text-8xl"
             >
               {props.seconds}
             </motion.p>
@@ -36,12 +36,12 @@ export function RoundOverlay(props: RoundOverlayProps) {
       {props.kind === "chip" && (
         <motion.p
           key="chip"
-          className="absolute bottom-3 left-3 flex items-center gap-2 rounded-full border-2 border-slate-900 bg-butter py-1.5 pr-3.5 pl-2.5 font-mono text-xs font-bold text-slate-950 shadow-[2px_2px_0px_0px_#0F172A]"
+          className="absolute bottom-3 left-3 z-10 flex items-center gap-2 border-2 border-black bg-arcade py-1.5 pr-3 pl-2.5 font-pixel text-[11px] tracking-wide text-black uppercase shadow-pixel-sm"
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 6 }}
         >
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-slate-900" aria-hidden="true" />
+          <span className="h-1.5 w-1.5 animate-pulse bg-black" aria-hidden="true" />
           {props.text}
         </motion.p>
       )}

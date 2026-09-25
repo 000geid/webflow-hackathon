@@ -1,16 +1,14 @@
 "use client";
 
-import { useEffect, type PointerEvent, type ReactNode } from "react";
+import { useEffect, type PointerEvent } from "react";
 import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
 import { CountUp } from "@/components/ui/CountUp";
 import { PillButton } from "@/components/ui/PillButton";
 import type { RoundHistory } from "@/lib/game/hints";
 import { copyText } from "@/lib/ui/clipboard";
 import { cn } from "@/lib/ui/cn";
-import { getStarRating } from "@/lib/ui/results";
-import { formatSeconds, victoryStats, victoryTitle } from "@/lib/ui/victory";
+import { formatSeconds, victoryStats, victoryTitle, type VictoryTitle } from "@/lib/ui/victory";
 import type { Toast } from "./LiveToast";
-import { StarRating } from "./StarRating";
 
 export type RankingEntry = { id: string; name: string; avatar: string; score: number; isYou: boolean };
 
@@ -18,12 +16,8 @@ export interface VictoryModalProps {
   open: boolean;
   player: { name: string; avatar: string };
   score: number;
-  /** Puntaje máximo posible (rondas × 1000). */
-  maxScore: number;
   totalRounds: number;
   history: RoundHistory[];
-  /** Pistas usadas en la partida (cambia el título). */
-  hintsUsed: number;
   /** "Sala 59GT2" o "Solo": va impreso en la tarjeta. */
   edition: string;
   /** Multijugador: tabla final ordenada por puntaje. */
@@ -36,7 +30,40 @@ export interface VictoryModalProps {
 }
 
 const WATERFALL_ACCURACY = 60;
-const CONFETTI_COLORS = ["#2563eb", "#60a5fa", "#fcd34d", "#34d399", "#ffffff"];
+const CONFETTI_COLORS = ["#10b981", "#06b6d4", "#9333ea", "#f59e0b", "#f3efe6"];
+
+/* Color del marco del avatar según la rareza del título. */
+const RARITY_FRAME: Record<VictoryTitle["rarity"], string> = {
+  Legendaria: "border-arcade shadow-[0_0_24px_rgb(245_158_11/0.65)]",
+  Épica: "border-cyan-400 shadow-[0_0_24px_rgb(34_211_238/0.6)]",
+  Rara: "border-purple-400 shadow-[0_0_24px_rgb(192_132_252/0.6)]",
+  Común: "border-slate-400 shadow-[0_0_18px_rgb(148_163_184/0.35)]",
+};
+const RARITY_CHIP: Record<VictoryTitle["rarity"], string> = {
+  Legendaria: "bg-arcade text-black",
+  Épica: "bg-cyan-400 text-black",
+  Rara: "bg-purple-400 text-black",
+  Común: "bg-slate-400 text-black",
+};
+
+/**
+ * Insignia 8-bit: marco cuadrado con brillo neón y esquinas "mordidas" de a un píxel,
+ * con el avatar del jugador adentro.
+ */
+function PixelBadge({ avatar, rarity }: { avatar: string; rarity: VictoryTitle["rarity"] }) {
+  return (
+    <div className="relative mx-auto h-24 w-24">
+      <div className={cn("grid h-full w-full place-items-center border-4 bg-panel text-5xl", RARITY_FRAME[rarity])}>
+        <span aria-hidden="true">{avatar}</span>
+      </div>
+      {/* Esquinas pixeladas */}
+      {/* Cada esquina "muerde" el borde de 4px: da el escalón típico de los sprites 8-bit. */}
+      {["top-0 left-0", "top-0 right-0", "bottom-0 left-0", "bottom-0 right-0"].map((corner) => (
+        <span key={corner} aria-hidden="true" className={cn("absolute h-1 w-1 bg-crt", corner)} />
+      ))}
+    </div>
+  );
+}
 
 /** Lluvia continua de confetti mientras la tarjeta está abierta. Devuelve la función para cortarla. */
 function startWaterfall(): () => void {
@@ -68,25 +95,14 @@ function startWaterfall(): () => void {
   };
 }
 
-function StatCapsule({ label, children, sub }: { label: string; children: ReactNode; sub?: string }) {
-  return (
-    <div className="min-w-0 rounded-2xl bg-white/[0.06] px-4 py-3 ring-1 ring-white/10">
-      <dt className="font-mono text-[10px] tracking-wider text-slate-400 uppercase">{label}</dt>
-      <dd className="mt-1 truncate text-2xl leading-tight font-black tracking-tight tabular-nums">{children}</dd>
-      {sub && <p className="mt-0.5 truncate font-mono text-[11px] text-slate-400">{sub}</p>}
-    </div>
-  );
-}
-
-/** Tarjeta coleccionable de fin de partida: título según desempeño, métricas y acciones para compartir. */
+/** Tarjeta-trofeo 8-bit de fin de partida: insignia, título, dos métricas y acciones para compartir. */
 export function VictoryModal({
-  open, player, score, maxScore, totalRounds, history, hintsUsed, edition, ranking,
+  open, player, score, totalRounds, history, edition, ranking,
   onPlayAgain, playAgainLabel = "Jugar de nuevo", playAgainDisabled = false, onExit, onNotify,
 }: VictoryModalProps) {
   const reduceMotion = useReducedMotion();
   const stats = victoryStats(history, totalRounds);
-  const title = victoryTitle({ score, maxScore, hintsUsed });
-  const stars = getStarRating(score, maxScore);
+  const title = victoryTitle(stats);
   const place = ranking ? 1 + ranking.filter((entry) => entry.score > score).length : null;
 
   // Inclinación 3D siguiendo el puntero, con resorte para que no sea brusca.
@@ -113,7 +129,7 @@ export function VictoryModal({
 
   async function share() {
     const url = `${window.location.origin}${window.location.pathname}`;
-    const text = `${title.emoji} ${title.title} en Pixel Rush: ${score.toLocaleString("es-AR")} pts · ${stats.correct}/${stats.total} correctas`
+    const text = `${title.title} en Pixel Rush: ${score.toLocaleString("es-AR")} pts · ${stats.correct}/${stats.total} correctas`
       + `${stats.averageMs !== null ? ` · ${formatSeconds(stats.averageMs)} de media` : ""}. ¿Me superás? ${url}`;
     if (await copyText(text)) onNotify?.({ icon: "✓", text: "Desafío copiado: pegalo donde quieras", tone: "success" });
     else onNotify?.({ icon: "!", text: "No se pudo copiar el desafío", tone: "danger" });
@@ -124,7 +140,7 @@ export function VictoryModal({
       {open && (
         <motion.div
           key="backdrop"
-          className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-md"
+          className="fixed inset-0 z-50 overflow-y-auto bg-crt/70 backdrop-blur-md"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -141,85 +157,68 @@ export function VictoryModal({
               transition={{ type: "spring", stiffness: 260, damping: 22 }}
             >
               <motion.div onPointerMove={tilt} onPointerLeave={resetTilt} style={{ rotateX, rotateY }} className="[transform-style:preserve-3d]">
-                {/* Borde holográfico */}
-                <div className="rounded-[1.9rem] bg-[linear-gradient(115deg,#60a5fa,#a78bfa,#fcd34d,#34d399,#60a5fa)] bg-[length:300%_100%] p-[3px] shadow-[0_30px_80px_-20px_rgb(37_99_235/0.55)] motion-safe:animate-holo">
-                  <div className="relative isolate overflow-hidden rounded-[1.75rem] bg-slate-950 p-5 text-white">
+                {/* Borde holográfico: verde → cian → violeta, en movimiento. */}
+                <div className="bg-[linear-gradient(115deg,#34d399,#06b6d4,#9333ea,#06b6d4,#34d399)] bg-[length:300%_100%] p-[3px] shadow-[8px_8px_0px_0px_#000,0_0_50px_-6px_rgb(6_182_212/0.55)] motion-safe:animate-holo">
+                  <div className="relative isolate overflow-hidden bg-crt px-5 pt-5 pb-4 text-center">
                     {/* Luz ambiente + brillo que cruza la tarjeta */}
-                    <div aria-hidden="true" className="absolute -top-24 -right-16 -z-10 h-64 w-64 rounded-full bg-blue-600/40 blur-3xl" />
-                    <div aria-hidden="true" className="absolute -bottom-24 -left-16 -z-10 h-56 w-56 rounded-full bg-amber-300/15 blur-3xl" />
-                    <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_35%,rgb(255_255_255/0.12)_48%,transparent_60%)] bg-[length:250%_100%] motion-safe:animate-sheen" />
+                    <div aria-hidden="true" className="absolute -top-24 left-1/2 -z-10 h-64 w-64 -translate-x-1/2 rounded-full bg-cyan-500/20 blur-3xl" />
+                    <div aria-hidden="true" className="absolute -bottom-28 -left-16 -z-10 h-56 w-56 rounded-full bg-purple-600/20 blur-3xl" />
+                    <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_35%,rgb(255_255_255/0.1)_48%,transparent_60%)] bg-[length:250%_100%] motion-safe:animate-sheen" />
 
-                    <div className="flex items-center justify-between font-mono text-[10px] tracking-[0.18em] uppercase">
-                      <span className="rounded-full bg-white/10 px-2.5 py-1 text-slate-300">{edition}</span>
-                      <span className={cn("rounded-full px-2.5 py-1 font-bold", title.rarity === "Legendaria" ? "bg-amber-300 text-slate-950" : "bg-white/10 text-slate-300")}>
-                        {title.rarity}
-                      </span>
+                    <div className="flex justify-end">
+                      <span className={cn("px-2 py-1 font-pixel text-[9px] tracking-widest uppercase", RARITY_CHIP[title.rarity])}>{title.rarity}</span>
                     </div>
 
-                    <div className="mt-5 flex items-center gap-3">
-                      <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-white/10 text-3xl ring-2 ring-amber-300/80" aria-hidden="true">
-                        {player.avatar}
-                      </span>
-                      <div className="min-w-0">
-                        <p className="truncate text-lg font-bold">{player.name || "Jugador"}</p>
-                        <p className="font-mono text-[11px] tracking-wider text-slate-400 uppercase">
-                          {place ? `Puesto ${place} de ${ranking!.length}` : "Partida solo"}
+                    <PixelBadge avatar={player.avatar} rarity={title.rarity} />
+                    <p className="mt-4 truncate text-base font-bold text-cream">{player.name || "Jugador"}</p>
+                    <p className="mt-0.5 font-pixel text-[10px] tracking-wider text-slate-500 uppercase">
+                      {place ? `Puesto ${place} de ${ranking!.length}` : "Partida solo"}
+                    </p>
+
+                    <h2 id="victory-title" className="mt-4 font-pixel text-2xl leading-tight font-black text-amber-300 uppercase [text-shadow:0_0_18px_rgb(252_211_77/0.65)]">
+                      {title.title}
+                    </h2>
+                    <p className="mx-auto mt-2 max-w-[16rem] text-xs leading-relaxed text-slate-300">{title.tagline}</p>
+
+                    {/* Dos métricas protagonistas */}
+                    <dl className="mt-6 grid grid-cols-2 divide-x-2 divide-dashed divide-edge border-y-2 border-dashed border-edge py-4">
+                      <div className="px-2">
+                        <dt className="font-pixel text-[10px] tracking-widest text-slate-500 uppercase">Puntaje</dt>
+                        <dd className="mt-2 font-pixel text-3xl leading-none text-[#F59E0B] tabular-nums [text-shadow:0_0_16px_rgb(245_158_11/0.6)]">
+                          <CountUp value={score} />
+                        </dd>
+                        <p className="mt-1.5 font-pixel text-[10px] tracking-widest text-arcade/70 uppercase">Pts</p>
+                      </div>
+                      <div className="px-2">
+                        <dt className="font-pixel text-[10px] tracking-widest text-slate-500 uppercase">Precisión</dt>
+                        <dd className="mt-2 font-pixel text-3xl leading-none text-[#10B981] tabular-nums [text-shadow:0_0_16px_rgb(16_185_129/0.6)]">
+                          <CountUp value={stats.accuracy} suffix="%" />
+                        </dd>
+                        <p className="mt-1.5 font-pixel text-[10px] tracking-widest text-neon/70 uppercase">
+                          {stats.correct}/{stats.total}
                         </p>
                       </div>
-                    </div>
-
-                    <div className="mt-5">
-                      <p className="text-3xl" aria-hidden="true">{title.emoji}</p>
-                      <h2 id="victory-title" className="mt-1 text-3xl leading-none font-black tracking-tight text-amber-300 uppercase sm:text-4xl">
-                        {title.title}
-                        {title.accent === "blue-dot" && (
-                          <span aria-hidden="true" className="ml-2 inline-block h-3 w-3 -translate-y-1 rounded-full bg-blue-500 shadow-[0_0_12px_rgb(59_130_246/0.9)]" />
-                        )}
-                      </h2>
-                      <p className="mt-2 text-sm text-slate-400">{title.tagline}</p>
-                    </div>
-
-                    <div className="mt-4">
-                      <StarRating stars={stars} size="sm" align="start" />
-                    </div>
-
-                    <dl className="mt-5 grid grid-cols-2 gap-2.5">
-                      <StatCapsule label="Puntaje total" sub={`de ${maxScore.toLocaleString("es-AR")}`}>
-                        <CountUp value={score} /> <span className="text-xs font-bold text-slate-400">PTS</span>
-                      </StatCapsule>
-                      <StatCapsule label="Precisión" sub={`${stats.correct}/${stats.total} correctas`}>
-                        <CountUp value={stats.accuracy} suffix="%" />
-                      </StatCapsule>
-                      <StatCapsule label="Tiempo medio" sub="hasta frenar">
-                        {formatSeconds(stats.averageMs)}
-                      </StatCapsule>
-                      <StatCapsule label="Categoría" sub={`${history.length} rondas`}>
-                        <span className="text-base">{stats.category}</span>
-                      </StatCapsule>
                     </dl>
 
                     {ranking && (
-                      <ol className="mt-3 divide-y divide-white/10 rounded-2xl bg-white/[0.04] ring-1 ring-white/10" aria-label="Tabla final">
+                      <ol className="mt-4 space-y-1 text-left" aria-label="Tabla final">
                         {ranking.map((entry, index) => (
-                          <li key={entry.id} className={cn("flex items-center gap-2.5 px-3 py-2", entry.isYou && "bg-white/[0.06]")}>
-                            <span
-                              className={cn("w-7 text-center font-mono text-xs font-bold", index === 0 ? "text-amber-300" : "text-slate-400")}
-                              aria-label={`Puesto ${index + 1}`}
-                            >
+                          <li key={entry.id} className={cn("flex items-center gap-2.5 px-2 py-1.5", entry.isYou && "bg-cyan-500/10")}>
+                            <span className={cn("w-6 font-pixel text-[11px]", index === 0 ? "text-arcade" : "text-slate-500")} aria-label={`Puesto ${index + 1}`}>
                               {index + 1}º
                             </span>
                             <span className="text-base" aria-hidden="true">{entry.avatar}</span>
-                            <span className="min-w-0 flex-1 truncate text-sm font-semibold">{entry.name}</span>
-                            <span className="font-mono text-sm font-bold tabular-nums">{entry.score.toLocaleString("es-AR")}</span>
+                            <span className="min-w-0 flex-1 truncate text-sm font-semibold text-cream">{entry.name}</span>
+                            <span className="font-pixel text-xs text-slate-300 tabular-nums">{entry.score}</span>
                           </li>
                         ))}
                       </ol>
                     )}
 
-                    <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-3 font-mono text-[10px] tracking-[0.18em] text-slate-500 uppercase">
-                      <span>Pixel Rush</span>
-                      <span>{new Date().toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" })}</span>
-                    </div>
+                    {/* Metadatos en una sola línea */}
+                    <p className="mt-4 truncate font-pixel text-[9px] tracking-widest text-slate-600 uppercase">
+                      {edition} · {stats.category} · {new Date().toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" })}
+                    </p>
                   </div>
                 </div>
               </motion.div>
@@ -229,14 +228,14 @@ export function VictoryModal({
                 <PillButton size="lg" autoFocus onClick={onPlayAgain} disabled={playAgainDisabled} className="w-full">
                   {playAgainLabel}
                 </PillButton>
-                <PillButton variant="light" size="md" onClick={() => void share()} className="w-full">
-                  Desafiar a un amigo
+                <PillButton variant="accent" size="md" onClick={() => void share()} className="w-full">
+                  Compartir / Desafiar
                 </PillButton>
                 {onExit && (
                   <button
                     type="button"
                     onClick={onExit}
-                    className="block w-full cursor-pointer py-2 text-center font-mono text-xs tracking-wider text-white/70 uppercase underline-offset-4 hover:text-white hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                    className="block w-full cursor-pointer py-2 text-center font-pixel text-[11px] tracking-widest text-slate-400 uppercase underline-offset-4 hover:text-cream hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neon-bright"
                   >
                     Volver al lobby
                   </button>
