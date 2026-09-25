@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+/* Tokens de Pixel Rush. Se usan como clases: bg-canvas, text-brand, bg-success… */
+@theme {
+  --color-canvas: #f8fafc;
+  --color-brand: #2563eb;
+  --color-brand-hover: #1d4ed8;
+  --color-success: #10b981;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  @apply bg-canvas text-slate-900 antialiased;
+}
