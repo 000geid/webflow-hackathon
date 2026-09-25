@@ -9,7 +9,11 @@ interface GuessButtonProps {
   onResume?: () => void;
 }
 
-/** ADIVINAR frena el tiempo y muestra las opciones. REANUDAR vuelve a correr. */
+/**
+ * Botón arcade 3D. ADIVINAR frena el tiempo y muestra las opciones; REANUDAR vuelve a correr.
+ * Al apretar baja 4px y pierde el borde inferior; `active:mb-1` compensa esos 4px
+ * para que lo de abajo no salte.
+ */
 export function GuessButton({ isPaused, disabled, onGuess, onResume }: GuessButtonProps) {
   return (
     <button
@@ -18,13 +22,14 @@ export function GuessButton({ isPaused, disabled, onGuess, onResume }: GuessButt
       disabled={disabled}
       aria-pressed={isPaused}
       className={cn(
-        "mt-6 w-full cursor-pointer rounded-2xl py-5 text-xl font-extrabold tracking-wider text-white uppercase shadow-lg transition-all duration-200 sm:text-2xl",
-        "hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 active:scale-[0.98]",
+        "mt-8 w-full cursor-pointer rounded-2xl border-b-4 py-4 text-xl font-black tracking-[0.15em] text-white uppercase sm:py-5 sm:text-2xl",
+        "transition-[transform,translate,background-color,border-color,margin] duration-100",
+        "enabled:active:mb-1 enabled:active:translate-y-1 enabled:active:border-b-0",
         "focus-visible:ring-4 focus-visible:outline-hidden",
-        "disabled:pointer-events-none disabled:opacity-40 disabled:shadow-none",
+        "disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-400",
         isPaused
-          ? "bg-slate-900 shadow-slate-900/20 hover:bg-slate-800 focus-visible:ring-slate-400/40"
-          : "bg-brand shadow-blue-500/25 hover:bg-brand-hover hover:shadow-blue-500/30 focus-visible:ring-blue-500/40",
+          ? "border-slate-950 bg-slate-800 hover:bg-slate-700 focus-visible:ring-slate-400/50"
+          : "border-brand-edge bg-brand hover:bg-[#3b74f0] focus-visible:ring-blue-400/50",
       )}
     >
       {isPaused ? "Reanudar" : "Adivinar"}

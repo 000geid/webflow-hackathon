@@ -2,10 +2,14 @@
 
 /* Tokens de Pixel Rush. Se usan como clases: bg-canvas, text-brand, animate-shake… */
 @theme {
-  --color-canvas: #f8fafc;
+  --color-canvas: #f1f5f9;
+  --color-ink: #0f172a;
   --color-brand: #2563eb;
   --color-brand-hover: #1d4ed8;
+  --color-brand-edge: #1e40af;
   --color-success: #10b981;
+
+  --font-sans: "Nunito Variable", ui-rounded, ui-sans-serif, system-ui, sans-serif;
 
   --animate-shake: shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 
@@ -17,6 +21,9 @@
   }
 }
 
+/* Fondo: gris frío suave con una grilla de puntos muy sutil. */
 body {
-  @apply bg-canvas font-sans text-slate-900 antialiased;
+  @apply bg-canvas font-sans text-ink antialiased;
+  background-image: radial-gradient(circle, rgb(15 23 42 / 0.07) 1px, transparent 1px);
+  background-size: 22px 22px;
 }

@@ -12,8 +12,8 @@ interface GameImageProps {
 
 export function GameImage({ src, alt, timeLeft, duration, revealed = false }: GameImageProps) {
   return (
-    // overflow-hidden + rounded-2xl: el zoom nunca se sale del marco.
-    <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-slate-100 shadow-sm ring-1 ring-slate-200">
+    // Marco grueso + sombra sólida abajo. overflow-hidden: el zoom nunca se sale.
+    <div className="relative aspect-video w-full overflow-hidden rounded-3xl border-4 border-ink bg-slate-100 shadow-[0_8px_0_0_#0f172a]">
       {src ? (
         // Las imágenes vienen del CDN de Webflow CMS. Se usa <img> para no
         // tener que tocar next.config (remotePatterns / optimización en Cloud).

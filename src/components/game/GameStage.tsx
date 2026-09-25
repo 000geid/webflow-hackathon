@@ -2,7 +2,7 @@
 
 import { AnimatePresence } from "framer-motion";
 import type { Choice } from "@/lib/game/types";
-import { ROUND_DURATION_MS } from "@/lib/game/rules";
+import { ROUND_DURATION_MS, ROUNDS_PER_GAME } from "@/lib/game/rules";
 import { GameHeader } from "./GameHeader";
 import { GameImage } from "./GameImage";
 import { GuessButton } from "./GuessButton";
@@ -15,6 +15,7 @@ import { OptionsGrid } from "./OptionsGrid";
  *   category  ← view.round.category
  *   choices   ← view.round.choices   (vacío hasta pausar)
  *   score     ← view.score
+ *   roundIndex / totalRounds ← view.roundIndex / view.totalRounds
  *   timeLeft  ← (view.round.deadline - ahora) / 1000
  *   isPaused  ← view.status === "paused"
  *   selectedChoiceId / correctChoiceId ← view.round.result
@@ -27,6 +28,11 @@ export interface GameStageProps {
   /** Duración total de la ronda en segundos. */
   duration?: number;
   score: number;
+  /** Ronda actual (desde 0) y total, para la barra de progreso. */
+  roundIndex?: number;
+  totalRounds?: number;
+  /** Resultado de las rondas ya jugadas (true = acierto). */
+  results?: boolean[];
   /** true = tiempo frenado, se ven las opciones y el botón dice REANUDAR. */
   isPaused?: boolean;
   /** true = ronda cerrada (respondida o sin tiempo): nada se puede tocar. */
@@ -46,6 +52,9 @@ export function GameStage({
   timeLeft,
   duration = ROUND_DURATION_MS / 1000,
   score,
+  roundIndex = 0,
+  totalRounds = ROUNDS_PER_GAME,
+  results = [],
   isPaused = false,
   isLocked = false,
   choices = [],
@@ -59,9 +68,15 @@ export function GameStage({
   const showOptions = isPaused || isRevealed;
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-10">
+    <main className="flex min-h-screen items-start justify-center px-4 py-8 sm:items-center sm:py-12">
       <section className="w-full max-w-2xl">
-        <GameHeader timeLeft={timeLeft} score={score} />
+        <GameHeader
+          timeLeft={timeLeft}
+          score={score}
+          roundIndex={roundIndex}
+          totalRounds={totalRounds}
+          results={results}
+        />
 
         <GameImage
           src={imageUrl}
