@@ -1,41 +1,38 @@
 @import "tailwindcss";
 
 /*
- * Pixel Rush — Retro-Brutalist Tech.
- * Bordes negros sólidos, sombras duras desplazadas (sin blur) y dos acentos:
- * azul eléctrico y amarillo eléctrico.
+ * Pixel Rush — Swiss-tech Brutalist.
+ * Bordes oscuros finos, una sola sombra dura sutil y un único acento:
+ * azul eléctrico. Todo lo demás es escala de grises (slate).
  */
 @theme {
   --color-canvas: #f8fafc;
-  --color-ink: #020617;
+  --color-ink: #090d16;
   --color-brand: #2563eb;
   --color-brand-hover: #1d4ed8;
-  --color-highlight: #fde047;
-  --color-success: #10b981;
 
   --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
 
-  /* Sombras duras: shadow-hard-xs … shadow-hard-xl, shadow-hard-brand */
+  /* Sombras duras (sin blur): shadow-hard-xs … shadow-hard-lg */
   --shadow-hard-xs: 2px 2px 0 0 var(--color-ink);
   --shadow-hard-sm: 3px 3px 0 0 var(--color-ink);
   --shadow-hard: 4px 4px 0 0 var(--color-ink);
   --shadow-hard-lg: 6px 6px 0 0 var(--color-ink);
-  --shadow-hard-xl: 8px 8px 0 0 var(--color-ink);
-  --shadow-hard-brand: 5px 5px 0 0 var(--color-brand);
 
-  --animate-shake: shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  --animate-shake: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 
   @keyframes shake {
     10%, 90% { transform: translateX(-1px); }
     20%, 80% { transform: translateX(2px); }
-    30%, 50%, 70% { transform: translateX(-5px); }
-    40%, 60% { transform: translateX(5px); }
+    30%, 50%, 70% { transform: translateX(-3px); }
+    40%, 60% { transform: translateX(3px); }
   }
 }
 
 /* Fondo claro con una grilla de puntos muy sutil. */
 body {
   @apply bg-canvas font-sans text-ink antialiased;
-  background-image: radial-gradient(circle, rgb(2 6 23 / 0.1) 1px, transparent 1.2px);
-  background-size: 20px 20px;
+  background-image: radial-gradient(circle, rgb(15 23 42 / 0.07) 1px, transparent 1.2px);
+  background-size: 22px 22px;
 }

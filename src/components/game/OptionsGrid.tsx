@@ -21,11 +21,11 @@ export function OptionsGrid({ choices, selectedChoiceId, correctChoiceId, locked
     <motion.div
       role="group"
       aria-label="Opciones de respuesta"
-      className="mt-6 grid grid-cols-2 gap-3 sm:gap-4"
-      initial={{ opacity: 0, scale: 0.95, y: 8 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95, y: 8 }}
-      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="mt-4 grid grid-cols-2 gap-2.5 sm:gap-3"
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 6 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
     >
       {choices.slice(0, OPTION_LETTERS.length).map((choice, index) => (
         <OptionButton

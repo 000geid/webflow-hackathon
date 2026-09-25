@@ -19,3 +19,20 @@ export function StarIcon({ className }: { className?: string }) {
     </svg>
   );
 }
+
+export function PauseIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
+      <rect x="6" y="5" width="4" height="14" rx="1" />
+      <rect x="14" y="5" width="4" height="14" rx="1" />
+    </svg>
+  );
+}
+
+export function PlayIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
+      <path d="M7 4.87a1 1 0 0 1 1.5-.86l11.03 6.63a1.6 1.6 0 0 1 0 2.72L8.5 19.99A1 1 0 0 1 7 19.13V4.87Z" />
+    </svg>
+  );
+}

@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/ui/cn";
 
-type BadgeTone = "highlight" | "brand" | "danger";
+type BadgeTone = "neutral" | "ink" | "danger";
 
 const TONES: Record<BadgeTone, string> = {
-  highlight: "bg-highlight text-ink",
-  brand: "bg-brand text-white",
-  danger: "bg-rose-500 text-white animate-pulse",
+  neutral: "border-slate-900 bg-white text-slate-900",
+  ink: "border-slate-900 bg-slate-950 text-white",
+  danger: "border-rose-600 bg-rose-50 text-rose-600",
 };
 
 interface BadgeProps {
@@ -16,13 +16,13 @@ interface BadgeProps {
   label?: string;
 }
 
-/** Pastilla brutalista: borde negro de 2px + sombra dura. */
-export function Badge({ icon, children, tone = "highlight", label }: BadgeProps) {
+/** Pastilla de datos: número en mono, borde fino y sombra dura mínima. */
+export function Badge({ icon, children, tone = "neutral", label }: BadgeProps) {
   return (
     <span
       aria-label={label}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-lg border-2 border-ink px-2.5 py-1 text-base leading-none font-extrabold tabular-nums shadow-hard-xs transition-colors duration-200",
+        "inline-flex items-center gap-1.5 rounded-md border-[1.5px] px-2.5 py-1.5 font-mono text-sm leading-none font-semibold tabular-nums shadow-hard-xs transition-colors duration-200",
         TONES[tone],
       )}
     >

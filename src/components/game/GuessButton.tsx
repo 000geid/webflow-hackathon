@@ -1,5 +1,6 @@
 "use client";
 
+import { PauseIcon, PlayIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/ui/cn";
 
 interface GuessButtonProps {
@@ -10,10 +11,12 @@ interface GuessButtonProps {
 }
 
 /**
- * Botón principal brutalista. ADIVINAR frena el tiempo y muestra las opciones;
+ * Botón principal. ADIVINAR frena el tiempo y muestra las opciones;
  * REANUDAR vuelve a correr. Al apretar se "hunde" hacia la sombra.
  */
 export function GuessButton({ isPaused, disabled, onGuess, onResume }: GuessButtonProps) {
+  const Icon = isPaused ? PlayIcon : PauseIcon;
+
   return (
     <button
       type="button"
@@ -21,15 +24,15 @@ export function GuessButton({ isPaused, disabled, onGuess, onResume }: GuessButt
       disabled={disabled}
       aria-pressed={isPaused}
       className={cn(
-        "mt-8 w-full cursor-pointer rounded-xl border-2 border-ink py-4 text-xl font-black tracking-[0.12em] uppercase shadow-hard sm:py-5 sm:text-2xl",
+        "mt-6 flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-xl border-2 border-slate-900 bg-blue-600 py-4 text-base font-extrabold tracking-wider text-white uppercase shadow-hard sm:text-lg",
         "transition-[translate,box-shadow,background-color] duration-100",
-        "enabled:hover:-translate-x-px enabled:hover:-translate-y-px enabled:hover:shadow-hard-lg",
+        "enabled:hover:-translate-x-px enabled:hover:-translate-y-px enabled:hover:bg-blue-700 enabled:hover:shadow-hard-lg",
         "enabled:active:translate-x-[2px] enabled:active:translate-y-[2px] enabled:active:shadow-none",
-        "focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-brand",
-        "disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none",
-        isPaused ? "bg-highlight text-ink" : "bg-brand text-white",
+        "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600",
+        "disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none",
       )}
     >
+      <Icon className="h-4 w-4" />
       {isPaused ? "Reanudar" : "Adivinar"}
     </button>
   );

@@ -2,10 +2,10 @@ import { cn } from "@/lib/ui/cn";
 import { getProgressSegments, type SegmentState } from "@/lib/ui/progress";
 
 const SEGMENT: Record<SegmentState, string> = {
-  correct: "bg-emerald-400",
+  correct: "bg-emerald-500",
   wrong: "bg-rose-500",
   current: "bg-brand",
-  upcoming: "bg-white",
+  upcoming: "bg-slate-200",
 };
 
 interface ProgressBarProps {
@@ -14,7 +14,7 @@ interface ProgressBarProps {
   results: boolean[];
 }
 
-/** Barra segmentada: un bloque por ronda, con borde negro como en pixel art. */
+/** Barra segmentada: un bloque fino por ronda. */
 export function ProgressBar({ totalRounds, roundIndex, results }: ProgressBarProps) {
   const segments = getProgressSegments(totalRounds, roundIndex, results);
 
@@ -26,17 +26,10 @@ export function ProgressBar({ totalRounds, roundIndex, results }: ProgressBarPro
       aria-valuemax={totalRounds}
       aria-valuenow={roundIndex + 1}
       aria-valuetext={`Ronda ${roundIndex + 1} de ${totalRounds}`}
-      className="flex gap-2"
+      className="flex gap-1.5"
     >
       {segments.map((state, i) => (
-        <span
-          key={i}
-          className={cn(
-            "h-4 flex-1 rounded-sm border-2 border-ink transition-colors duration-300",
-            SEGMENT[state],
-            state === "current" && "shadow-hard-xs",
-          )}
-        />
+        <span key={i} className={cn("h-1.5 flex-1 rounded-full transition-colors duration-300", SEGMENT[state])} />
       ))}
     </div>
   );
