@@ -87,6 +87,8 @@ Antes de desplegar: configurar el binding real de SQLite y aplicar la migración
 
 Una respuesta correcta vale `pointsAt(elapsedMs)` (`src/lib/game/rules.ts`): baja en línea recta de 1.000 puntos al segundo 0 a 100 al segundo 15 (por ejemplo, frenar a los 2 s vale 880). `elapsedMs` es el tiempo hasta que el jugador frenó, no hasta que respondió. Incorrecta o sin tiempo: 0. La UI muestra ese mismo valor en vivo con la misma función, así el medidor nunca promete algo distinto a lo que se cobra.
 
+En salas, `elapsedMs` suma únicamente el tiempo en que la imagen estuvo revelándose. Los turnos de respuesta congelan ese reloj para todos.
+
 ## Pista (power-up)
 
 `{ "type": "hint", "roundIndex": 0 }` en `/actions` (partidas y salas): una pista por partida por jugador, solo con la ronda en curso y sin responder. Repetirla en la misma ronda es idempotente; pedirla en otra ronda responde `409`. La vista trae `hintsLeft` y `round.hint` (solo para quien la pidió, solo en esa ronda). En salas se emite el evento `hint` para avisar al resto, sin revelar el texto.
@@ -97,9 +99,9 @@ Las vistas también traen `history`: por cada ronda terminada, categoría, `elap
 
 # API de salas (multijugador)
 
-De 2 a 5 jugadores juegan las mismas cinco rondas al mismo tiempo. El puntaje por ronda es el mismo que en partidas solo (`scoreForAnswer`). La lógica está en `src/lib/game/room.ts` (pura, con tests en `tests/room.test.ts`) y la persistencia en `src/lib/server/rooms.ts`, tabla `rooms` (`migrations/0002_rooms.sql`). La sala vence a las 6 horas.
+De 2 a 5 jugadores juegan las mismas cinco rondas. **La primera persona que pausa gana el único turno de respuesta**: el reloj de revelado se congela para toda la sala y solo esa persona recibe las opciones. Tiene cinco segundos para elegir. Si acierta, termina la ronda y recibe puntos según el tiempo de revelado acumulado; si falla o vence su turno, el reloj continúa y los demás pueden intentar. Cada persona tiene un intento por ronda. La lógica está en `src/lib/game/room.ts` (pura, con tests en `tests/room.test.ts`) y la persistencia en `src/lib/server/rooms.ts`, tabla `rooms` (`migrations/0002_rooms.sql`). La sala vence a las 6 horas.
 
-Línea de tiempo de cada ronda: `startsAt` → 15 s de revelación → hasta 8 s más para responder si frenaste → `endedAt` → 4 s de resultados → siguiente ronda. La ronda cierra antes si todos respondieron. La primera arranca 3 s después de `start` (cuenta regresiva). Igual que en partidas solo, el tiempo avanza al consultar: cada request pone la sala al día.
+Línea de tiempo de cada ronda: `startsAt` → hasta 15 s acumulados de revelación, con pausas de hasta 5 s por intento → `endedAt` → 4 s de resultados → siguiente ronda. La ronda cierra al primer acierto, cuando todos intentaron o al agotarse el reloj. La primera arranca 3 s después de `start` (cuenta regresiva). Igual que en partidas solo, el tiempo avanza al consultar: cada request pone la sala al día. Las pausas simultáneas se resuelven con la versión de la fila en D1: la primera escritura válida gana y la otra recibe `409`.
 
 - `POST /api/rooms` con `{ "name": "Ana", "avatar": "avatar7", "category": "memes" }` (`category` opcional) → `201`: `RoomView` + `token`. El avatar debe ser uno de `AVATARS` (`src/lib/game/avatars.ts`); el nombre, de 1 a 16 caracteres. Los códigos tienen 5 caracteres sin I, L, O, 0 ni 1.
 - `POST /api/rooms/{code}/join` con el mismo cuerpo → `201`: `RoomView` + `token`. Solo en lobby y con lugar. Un nombre repetido recibe sufijo (`Ana 2`).
@@ -107,10 +109,11 @@ Línea de tiempo de cada ronda: `startsAt` → 15 s de revelación → hasta 8 s
 - `POST /api/rooms/{code}/actions` con el Bearer token:
   - `{ "type": "ready", "ready": true }` — solo en el lobby. Cuando hay 2+ jugadores y todos están listos, la partida arranca sola (evento `ready`, luego `started`). Si se va el único que faltaba, también arranca.
   - `{ "type": "start" }` — solo anfitrión, con 2+ jugadores: fuerza el inicio aunque falte confirmar.
-  - `{ "type": "pause", "roundIndex": 0 }` y `{ "type": "answer", "roundIndex": 0, "choiceId": "A" }` — igual que en partidas solo.
+  - `{ "type": "pause", "roundIndex": 0 }` — intenta ganar el turno. Si ya ganó otra persona, responde `409`.
+  - `{ "type": "answer", "roundIndex": 0, "choiceId": "A" }` — solo la persona que ganó el turno puede responder antes de que pasen cinco segundos.
   - `{ "type": "rematch" }` — solo anfitrión, con la partida terminada: vuelve al lobby con rondas nuevas.
-  - `{ "type": "leave" }` — en el lobby quita al jugador (el anfitrión pasa al siguiente); durante la partida queda como desconectado. Responde `{ "left": true }`.
+  - `{ "type": "leave" }` — en el lobby quita al jugador; durante la partida conserva su puntaje pero figura desconectado. Si era anfitrión, el rol pasa a otra persona conectada. Responde `{ "left": true }`.
 
-`RoomView.events` trae los últimos 20 eventos (`joined`, `left`, `started`, `guessing`, `correct`, `wrong`, `rematch`) con `seq` creciente para los avisos en vivo. Las opciones y la respuesta correcta de una ronda solo se envían a quien ya frenó o cuando la ronda terminó; el estado `correct`/`wrong` de los demás sí es visible en vivo.
+`RoomView.events` trae los últimos 20 eventos (`joined`, `left`, `started`, `guessing`, `correct`, `wrong`, `rematch`) con `seq` creciente para los avisos en vivo. Durante el turno solo quien ganó la pausa recibe las opciones; la respuesta correcta se envía a toda la sala al cerrar la ronda. El estado `guessing`/`wrong` de los demás es visible en vivo.
 
 En Webflow Cloud hay que aplicar la migración `0002_rooms.sql` a la base D1 antes de usar salas.

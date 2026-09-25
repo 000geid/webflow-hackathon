@@ -34,7 +34,10 @@ export function PixelRushApp() {
 function AppShell() {
   const [screen, setScreen] = useState<Screen>(() => {
     const session = loadRoomSession();
-    return session ? { kind: "room", ...session } : { kind: "lobby" };
+    const invite = new URLSearchParams(window.location.search).get("room");
+    return session && (!invite || invite.toUpperCase() === session.code)
+      ? { kind: "room", ...session }
+      : { kind: "lobby" };
   });
   const [profile, setProfile] = useState(loadProfile);
   const [category, setCategory] = useState<CategoryChoice>(loadCategory);

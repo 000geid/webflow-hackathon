@@ -144,23 +144,25 @@ export function RoomClient({ code, token, onExit, notify, onFinished }: RoomClie
 
   const round = view.round;
   const now = clock === 0 ? view.serverNow : clock + offset;
-  // El server pudo decir "countdown" hace un momento; el reloj local decide cuándo arranca.
-  const status = round.status === "countdown" && now >= round.startsAt ? "revealing" : round.status;
+  // El reloj local mantiene suave la revelación entre consultas al servidor.
+  const phase = round.phase === "countdown" && now >= round.startsAt ? "revealing" : round.phase;
   const timeLeft =
-    status === "countdown" ? DURATION_S
-      : status === "revealing" ? Math.min(DURATION_S, Math.max(0, (round.deadline - now) / 1000))
-        : (ROUND_DURATION_MS - round.elapsedMs) / 1000;
+    phase === "countdown" ? DURATION_S
+      : phase === "revealing" ? Math.min(DURATION_S, Math.max(0, (round.deadline - now) / 1000))
+        : round.remainingMs / 1000;
   const secondsUntil = (at: number) => Math.max(0, Math.ceil((at - now) / 1000));
-  const answered = view.players.filter((p) => p.status === "correct" || p.status === "wrong" || p.status === "timeout").length;
-  const isLastRound = round.index === view.totalRounds - 1;
   const me = view.players.find((p) => p.isYou);
 
   const overlay =
-    status === "countdown" ? <RoundOverlay kind="countdown" seconds={Math.max(1, secondsUntil(round.startsAt))} />
-      : status === "paused" ? <RoundOverlay kind="chip" text={`Respondé en ${secondsUntil(round.answerDeadline)}s`} />
-        : status === "answered" ? <RoundOverlay kind="chip" text={`Esperando al resto · ${answered}/${view.players.length}`} />
-          : status === "ended" && round.nextStartsAt !== null && view.status === "playing"
-            ? <RoundOverlay kind="chip" text={`${isLastRound ? "Resultados" : "Siguiente ronda"} en ${secondsUntil(round.nextStartsAt)}s`} />
+    phase === "countdown" ? <RoundOverlay kind="countdown" seconds={Math.max(1, secondsUntil(round.startsAt))} />
+      : phase === "guessing" ? <RoundOverlay kind="chip" text={round.isYourTurn
+        ? `Ganaste el turno · respondé en ${secondsUntil(round.answerDeadline)}s`
+        : `${round.guesser?.name ?? "Alguien"} ganó el turno · ${secondsUntil(round.answerDeadline)}s`} />
+        : phase === "revealing" && round.hasAttempted ? <RoundOverlay kind="chip" text="Ya intentaste esta ronda · esperando al resto" />
+          : phase === "result" && round.nextStartsAt !== null && view.status === "playing"
+            ? <RoundOverlay kind="chip" text={`${round.winnerId
+              ? `${view.players.find((p) => p.id === round.winnerId)?.name ?? "Alguien"} acertó`
+              : "Nadie acertó"} · siguiente ronda en ${secondsUntil(round.nextStartsAt)}s`} />
             : <RoundOverlay kind="none" />;
 
   return (
@@ -173,8 +175,8 @@ export function RoomClient({ code, token, onExit, notify, onFinished }: RoomClie
         score={view.score}
         roundIndex={round.index}
         totalRounds={view.totalRounds}
-        isPaused={status === "paused"}
-        isLocked={busy || view.status !== "playing" || (status !== "revealing" && status !== "paused")}
+        isPaused={round.isYourTurn}
+        isLocked={busy || view.status !== "playing" || round.hasAttempted || (phase !== "revealing" && !round.isYourTurn)}
         canResume={false}
         choices={round.choices}
         selectedChoiceId={round.result?.choiceId ?? null}

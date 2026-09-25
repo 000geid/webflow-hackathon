@@ -5,12 +5,9 @@ import { ROUND_DURATION_MS, scoreForAnswer } from "./rules";
 import type { Choice, GameState, RoundContent } from "./types";
 
 /*
- * Salas multijugador. Todos juegan las mismas rondas al mismo tiempo:
- *
- *   startsAt ──15s revelando──▶ + 8s para responder ──▶ endedAt ──4s resultados──▶ siguiente ronda
- *
- * Cada jugador frena y responde por su cuenta, con el mismo puntaje que el modo
- * solo (scoreForAnswer). La ronda termina antes si todos ya respondieron.
+ * Salas multijugador: la primera pausa gana el turno de respuesta. El reloj
+ * compartido se congela cinco segundos; si falla, vuelve a correr y los demás
+ * pueden intentarlo. Cada jugador tiene un intento por ronda.
  * El tiempo avanza "perezosamente": syncRoom() se llama en cada request y
  * pone al día la sala según `now`, igual que expireRound() en partidas solo.
  */
@@ -18,7 +15,7 @@ import type { Choice, GameState, RoundContent } from "./types";
 export const MIN_PLAYERS = 2;
 export const MAX_PLAYERS = 5;
 export const COUNTDOWN_MS = 3_000;
-export const ANSWER_WINDOW_MS = 8_000;
+export const GUESS_DURATION_MS = 5_000;
 export const REVEAL_MS = 4_000;
 /** Sin consultas en este lapso, el jugador figura desconectado. */
 export const ONLINE_WINDOW_MS = 10_000;
@@ -36,6 +33,18 @@ type PlayerResult = {
   elapsedMs?: number | null;
 };
 export type PlayerRound = { pausedAt: number | null; result: PlayerResult | null };
+
+export type ActiveRound = {
+  index: number;
+  startsAt: number;
+  endedAt: number | null;
+  revealStartedAt: number | null;
+  remainingMs: number;
+  guesserId: string | null;
+  guessEndsAt: number | null;
+  guessElapsedMs: number | null;
+  winnerId: string | null;
+};
 
 export type RoomPlayer = {
   id: string;
@@ -71,7 +80,7 @@ export type RoomState = {
   status: "lobby" | "playing" | "finished";
   content: RoundContent[];
   players: RoomPlayer[];
-  round: { index: number; startsAt: number; endedAt: number | null } | null;
+  round: ActiveRound | null;
   events: RoomEvent[];
   seq: number;
 };
@@ -103,8 +112,9 @@ export type RoomPlayerView = {
 
 export type RoomRoundView = {
   index: number;
-  /** Desde tu punto de vista: countdown → revealing → paused → answered → ended. */
-  status: "countdown" | "revealing" | "paused" | "answered" | "ended";
+  /** Estado de la sala y estado personal de este jugador. */
+  phase: "countdown" | "revealing" | "guessing" | "result";
+  status: "countdown" | "revealing" | "paused" | "watching" | "answered" | "ended";
   imageUrl: string;
   category: string;
   startsAt: number;
@@ -112,6 +122,11 @@ export type RoomRoundView = {
   answerDeadline: number;
   nextStartsAt: number | null;
   elapsedMs: number;
+  remainingMs: number;
+  guesser: { id: string; name: string } | null;
+  hasAttempted: boolean;
+  isYourTurn: boolean;
+  winnerId: string | null;
   choices: Choice[];
   result: { choiceId: string | null; points: number; correctChoiceId: string } | null;
   hint: string | null;
@@ -185,36 +200,71 @@ export function addPlayer(state: RoomState, player: NewPlayer, now: number): str
   return joined.name;
 }
 
-/** Pone la sala al día: vence rondas, cierra la actual y arranca la siguiente. */
+function newRound(index: number, startsAt: number): ActiveRound {
+  return {
+    index, startsAt, endedAt: null, revealStartedAt: startsAt,
+    remainingMs: ROUND_DURATION_MS, guesserId: null, guessEndsAt: null,
+    guessElapsedMs: null, winnerId: null,
+  };
+}
+
+function allAttempted(state: RoomState): boolean {
+  return state.players.every((player) => player.rounds[state.round!.index].result !== null);
+}
+
+function finishRound(state: RoomState, at: number): void {
+  const round = state.round!;
+  round.endedAt = at;
+  round.revealStartedAt = null;
+  round.guesserId = null;
+  round.guessEndsAt = null;
+  for (const player of state.players) {
+    const entry = player.rounds[round.index];
+    if (!entry.result) entry.result = { choiceId: null, points: 0, correct: false, at };
+  }
+}
+
+function resumeOrFinish(state: RoomState, at: number): void {
+  const round = state.round!;
+  round.guesserId = null;
+  round.guessEndsAt = null;
+  round.guessElapsedMs = null;
+  if (round.remainingMs <= 0 || allAttempted(state)) {
+    finishRound(state, at);
+  } else {
+    round.revealStartedAt = at;
+  }
+}
+
+/** Pone la sala al día aunque no haya consultas entre transiciones. */
 export function syncRoom(state: RoomState, now: number): void {
-  while (state.status === "playing" && state.round) {
+  for (let i = 0; i < 32 && state.status === "playing" && state.round; i++) {
     const round = state.round;
-    const revealEnds = round.startsAt + ROUND_DURATION_MS;
-    const hardDeadline = revealEnds + ANSWER_WINDOW_MS;
-
-    if (round.endedAt === null) {
-      for (const player of state.players) {
-        const entry = player.rounds[round.index];
-        if (entry.result) continue;
-        // Nunca frenó: pierde al terminar la revelación. Frenó pero no respondió: al cerrar la ventana.
-        if (entry.pausedAt === null && now >= revealEnds) {
-          entry.result = { choiceId: null, points: 0, correct: false, at: revealEnds };
-        } else if (now >= hardDeadline) {
-          entry.result = { choiceId: null, points: 0, correct: false, at: hardDeadline };
-        }
+    if (round.endedAt !== null) {
+      const nextStartsAt = round.endedAt + REVEAL_MS;
+      if (now < nextStartsAt) return;
+      if (round.index >= state.content.length - 1) {
+        state.status = "finished";
+        return;
       }
-      const results = state.players.map((p) => p.rounds[round.index].result);
-      if (results.some((result) => result === null)) break;
-      round.endedAt = Math.max(round.startsAt, ...results.map((result) => result!.at));
+      state.round = newRound(round.index + 1, nextStartsAt);
+      continue;
     }
-
-    const nextStartsAt = round.endedAt + REVEAL_MS;
-    if (now < nextStartsAt) break;
-    if (round.index >= state.content.length - 1) {
-      state.status = "finished";
-      break;
+    if (round.guesserId !== null && round.guessEndsAt !== null) {
+      if (now < round.guessEndsAt) return;
+      const guesser = state.players.find((player) => player.id === round.guesserId);
+      if (guesser) {
+        const entry = guesser.rounds[round.index];
+        if (!entry.result) entry.result = { choiceId: null, points: 0, correct: false, at: round.guessEndsAt, elapsedMs: round.guessElapsedMs };
+      }
+      resumeOrFinish(state, round.guessEndsAt);
+      continue;
     }
-    state.round = { index: round.index + 1, startsAt: nextStartsAt, endedAt: null };
+    if (round.revealStartedAt === null) return;
+    const deadline = round.revealStartedAt + round.remainingMs;
+    if (now < deadline) return;
+    round.remainingMs = 0;
+    finishRound(state, deadline);
   }
 }
 
@@ -226,7 +276,7 @@ function currentRound(state: RoomState, roundIndex: number) {
 
 function startGame(state: RoomState, by: RoomPlayer, now: number) {
   state.status = "playing";
-  state.round = { index: 0, startsAt: now + COUNTDOWN_MS, endedAt: null };
+  state.round = newRound(0, now + COUNTDOWN_MS);
   for (const p of state.players) {
     p.rounds = emptyRounds(state.content.length);
     p.hintRound = null;
@@ -245,8 +295,20 @@ export function applyRoomAction(state: RoomState, playerId: string, action: Room
   const player = findPlayer(state, playerId);
 
   if (action.type === "leave") {
-    // Durante la partida el jugador queda como desconectado; solo se lo quita en el lobby.
-    if (state.status !== "lobby") return;
+    // Durante la partida conserva el puntaje, pero deja libre el rol de anfitrión.
+    if (state.status !== "lobby") {
+      player.lastSeen = 0;
+      if (state.hostId === playerId) {
+        const successor = state.players.find((candidate) => candidate.id !== playerId && now - candidate.lastSeen < ONLINE_WINDOW_MS);
+        if (successor) state.hostId = successor.id;
+      }
+      if (state.round?.guesserId === playerId) {
+        const entry = player.rounds[state.round.index];
+        entry.result = { choiceId: null, points: 0, correct: false, at: now, elapsedMs: state.round.guessElapsedMs };
+        resumeOrFinish(state, now);
+      }
+      return;
+    }
     state.players = state.players.filter((p) => p.id !== playerId);
     if (state.hostId === playerId && state.players.length > 0) state.hostId = state.players[0].id;
     pushEvent(state, player, "left", now);
@@ -281,6 +343,7 @@ export function applyRoomAction(state: RoomState, playerId: string, action: Room
     if (player.hintRound === round.index) return; // idempotente
     if (now < round.startsAt) throw new GameConflict("La ronda todavía no empezó.");
     if (entry.result) throw new GameConflict("La ronda ya terminó para vos.");
+    if (round.guesserId !== null && round.guesserId !== playerId) throw new GameConflict("Esperá a que termine el turno actual.");
     if (player.hintRound !== undefined && player.hintRound !== null) throw new GameConflict("Ya usaste tu pista de esta partida.");
     player.hintRound = round.index;
     pushEvent(state, player, "hint", now);
@@ -289,25 +352,34 @@ export function applyRoomAction(state: RoomState, playerId: string, action: Room
 
   if (action.type === "pause") {
     if (now < round.startsAt) throw new GameConflict("La ronda todavía no empezó.");
-    if (entry.result || entry.pausedAt !== null) return;
+    if (entry.result) throw new GameConflict("Ya intentaste adivinar esta ronda.");
+    if (round.guesserId !== null || round.revealStartedAt === null) throw new GameConflict("Otra persona ganó el turno.");
+    const elapsed = now - round.revealStartedAt;
+    round.remainingMs = Math.max(0, round.remainingMs - elapsed);
+    round.guessElapsedMs = ROUND_DURATION_MS - round.remainingMs;
+    round.revealStartedAt = null;
+    round.guesserId = playerId;
+    round.guessEndsAt = now + GUESS_DURATION_MS;
     entry.pausedAt = now;
     pushEvent(state, player, "guessing", now);
     return;
   }
 
-  if (entry.result) {
-    if (entry.result.choiceId !== null && entry.result.choiceId === action.choiceId) return;
-    throw new GameConflict(entry.result.choiceId === null ? "Se terminó el tiempo de esta ronda." : "La respuesta ya fue registrada.");
-  }
-  if (entry.pausedAt === null) throw new GameConflict("Primero hay que frenar la ronda.");
+  if (entry.result) throw new GameConflict("La respuesta ya fue registrada.");
+  if (round.guesserId !== playerId || round.guessEndsAt === null) throw new GameConflict("No tenés el turno para responder.");
   const content = state.content[round.index];
   if (!content.choices.some((choice) => choice.id === action.choiceId)) throw new GameConflict("La opción no pertenece a esta ronda.");
   const correct = action.choiceId === content.correctChoiceId;
-  const points = scoreForAnswer(entry.pausedAt - round.startsAt, correct);
-  entry.result = { choiceId: action.choiceId, points, correct, at: now, elapsedMs: entry.pausedAt - round.startsAt };
+  const elapsedMs = round.guessElapsedMs ?? ROUND_DURATION_MS;
+  const points = scoreForAnswer(elapsedMs, correct);
+  entry.result = { choiceId: action.choiceId, points, correct, at: now, elapsedMs };
   pushEvent(state, player, correct ? "correct" : "wrong", now, points);
-  // Si era el último en responder, la ronda se cierra ya.
-  syncRoom(state, now);
+  if (correct) {
+    round.winnerId = playerId;
+    finishRound(state, now);
+  } else {
+    resumeOrFinish(state, now);
+  }
 }
 
 /** Revancha: la sala vuelve al lobby con los mismos jugadores y rondas nuevas. */
@@ -316,6 +388,7 @@ export function restartRoom(state: RoomState, playerId: string, content: RoundCo
   const player = findPlayer(state, playerId);
   if (playerId !== state.hostId) throw new GameConflict("Solo el anfitrión puede pedir revancha.");
   if (state.status !== "finished") throw new GameConflict("La partida todavía no terminó.");
+  state.players = state.players.filter((p) => p.id === playerId || now - p.lastSeen < ONLINE_WINDOW_MS);
   state.status = "lobby";
   state.content = content;
   state.round = null;
@@ -355,7 +428,8 @@ function statusOf(state: RoomState, player: RoomPlayer, now: number): PlayerStat
   if (state.status === "lobby" || !state.round) return "waiting";
   const entry = player.rounds[state.round.index];
   if (entry.result) return entry.result.choiceId === null ? "timeout" : entry.result.correct ? "correct" : "wrong";
-  if (entry.pausedAt !== null) return "guessing";
+  if (state.round.guesserId === player.id) return "guessing";
+  if (state.round.guesserId !== null) return "waiting";
   return now < state.round.startsAt ? "waiting" : "revealing";
 }
 
@@ -379,24 +453,34 @@ export function roomView(code: string, state: RoomState, playerId: string, now: 
 
   let round: RoomRoundView | null = null;
   if (state.round && state.status !== "lobby") {
-    const { index, startsAt, endedAt } = state.round;
+    const { index, startsAt, endedAt, guesserId, guessEndsAt, revealStartedAt, remainingMs, winnerId } = state.round;
     const content = state.content[index];
     const entry = me.rounds[index];
     const ended = endedAt !== null;
-    const stoppedAt = entry.pausedAt ?? entry.result?.at ?? now;
+    const isYourTurn = guesserId === playerId && !ended;
+    const guesser = state.players.find((player) => player.id === guesserId);
+    const remaining = revealStartedAt !== null && now >= revealStartedAt
+      ? Math.max(0, remainingMs - (now - revealStartedAt)) : remainingMs;
+    const phase = ended ? "result" : now < startsAt ? "countdown" : guesserId !== null ? "guessing" : "revealing";
     round = {
       index,
-      status: ended ? "ended" : entry.result ? "answered" : now < startsAt ? "countdown" : entry.pausedAt !== null ? "paused" : "revealing",
+      phase,
+      status: ended ? "ended" : now < startsAt ? "countdown" : isYourTurn ? "paused" : entry.result ? "answered" : guesserId !== null ? "watching" : "revealing",
       imageUrl: content.imageUrl,
       category: content.category,
       startsAt,
-      deadline: startsAt + ROUND_DURATION_MS,
-      answerDeadline: startsAt + ROUND_DURATION_MS + ANSWER_WINDOW_MS,
+      deadline: revealStartedAt !== null ? revealStartedAt + remainingMs : 0,
+      answerDeadline: guessEndsAt ?? 0,
       nextStartsAt: ended ? endedAt + REVEAL_MS : null,
-      elapsedMs: Math.max(0, Math.min(stoppedAt - startsAt, ROUND_DURATION_MS)),
-      // Las opciones y la correcta solo se mandan cuando ya no dan ventaja.
-      choices: entry.pausedAt !== null || entry.result ? content.choices : [],
-      result: entry.result
+      elapsedMs: ROUND_DURATION_MS - remaining,
+      remainingMs: remaining,
+      guesser: guesser ? { id: guesser.id, name: guesser.name } : null,
+      hasAttempted: entry.result !== null,
+      isYourTurn,
+      winnerId,
+      // El turno de otro jugador nunca revela opciones ni la respuesta.
+      choices: isYourTurn || ended ? content.choices : [],
+      result: ended && entry.result
         ? { choiceId: entry.result.choiceId, points: entry.result.points, correctChoiceId: content.correctChoiceId }
         : null,
       hint: me.hintRound === index ? maskedHint(correctLabel(content)) : null,
