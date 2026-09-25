@@ -14,7 +14,7 @@ export function RoundOverlay(props: RoundOverlayProps) {
       {props.kind === "countdown" && (
         <motion.div
           key="countdown"
-          className="absolute inset-0 grid place-items-center rounded-2xl bg-slate-950/75 backdrop-blur-sm"
+          className="absolute inset-0 grid place-items-center rounded-2xl bg-slate-900/80 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -26,7 +26,7 @@ export function RoundOverlay(props: RoundOverlayProps) {
               initial={{ scale: 1.4, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: "spring", stiffness: 500, damping: 30 }}
-              className="mt-2 font-mono text-7xl font-bold tabular-nums sm:text-8xl"
+              className="mt-2 font-mono text-7xl font-black text-butter tabular-nums sm:text-8xl"
             >
               {props.seconds}
             </motion.p>
@@ -36,12 +36,12 @@ export function RoundOverlay(props: RoundOverlayProps) {
       {props.kind === "chip" && (
         <motion.p
           key="chip"
-          className="absolute bottom-3 left-3 flex items-center gap-2 rounded-full bg-slate-950/85 py-1.5 pr-3.5 pl-2.5 font-mono text-xs font-semibold text-white backdrop-blur-sm"
+          className="absolute bottom-3 left-3 flex items-center gap-2 rounded-full border-2 border-slate-900 bg-butter py-1.5 pr-3.5 pl-2.5 font-mono text-xs font-bold text-slate-950 shadow-[2px_2px_0px_0px_#0F172A]"
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 6 }}
         >
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-400" aria-hidden="true" />
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-slate-900" aria-hidden="true" />
           {props.text}
         </motion.p>
       )}

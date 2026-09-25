@@ -4,25 +4,24 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/ui/cn";
 import type { OptionState } from "@/lib/ui/option-state";
 
-/* Keycaps táctiles: fondo blanco, borde de 2px y sombra dura de 3px.
-   Los estados de resultado tiñen fondo, borde y sombra. */
+/* Keycaps táctiles en papel crema; los resultados usan la paleta pastel (menta acierto, coral error). */
 const CARD: Record<OptionState, string> = {
-  idle: "border-slate-950 bg-white text-slate-950 shadow-[3px_3px_0_0_#020617] enabled:hover:-translate-y-px enabled:hover:bg-slate-50 enabled:hover:shadow-[4px_4px_0_0_#020617]",
-  selected: "border-blue-600 bg-blue-50 text-slate-950 shadow-[3px_3px_0_0_#2563eb]",
-  correct: "border-emerald-600 bg-emerald-50 text-emerald-900 shadow-[3px_3px_0_0_#059669]",
-  wrong: "border-rose-600 bg-rose-50 text-rose-900 shadow-[3px_3px_0_0_#e11d48]",
-  revealed: "border-emerald-600 border-dashed bg-white text-emerald-800",
-  muted: "border-slate-300 bg-white/70 text-slate-400",
+  idle: "border-slate-900 bg-paper text-slate-950 shadow-[3px_3px_0px_0px_#0F172A] enabled:hover:-translate-y-px enabled:hover:bg-white enabled:hover:shadow-[4px_4px_0px_0px_#0F172A]",
+  selected: "border-slate-900 bg-butter text-slate-950 shadow-[3px_3px_0px_0px_#0F172A]",
+  correct: "border-slate-900 bg-mint text-slate-950 shadow-[3px_3px_0px_0px_#0F172A]",
+  wrong: "border-slate-900 bg-coral text-slate-950 shadow-[3px_3px_0px_0px_#0F172A]",
+  revealed: "border-dashed border-slate-900 bg-[#DCFCE7] text-slate-950",
+  muted: "border-line bg-paper/70 text-slate-400",
 };
 
-/* Keycap discreta con la letra. */
+/* Keycap con la letra. */
 const KEYCAP: Record<OptionState, string> = {
-  idle: "border-slate-300 bg-slate-100 text-slate-800",
-  selected: "border-blue-200 bg-blue-100 text-blue-700",
-  correct: "border-emerald-200 bg-emerald-100 text-emerald-700",
-  wrong: "border-rose-200 bg-rose-100 text-rose-700",
-  revealed: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  muted: "border-slate-200 bg-slate-50 text-slate-400",
+  idle: "border-slate-900 bg-cream text-slate-900",
+  selected: "border-slate-900 bg-paper text-slate-900",
+  correct: "border-slate-900 bg-paper text-slate-900",
+  wrong: "border-slate-900 bg-paper text-slate-900",
+  revealed: "border-slate-900 bg-mint text-slate-900",
+  muted: "border-line bg-cream text-slate-400",
 };
 
 interface OptionButtonProps {
@@ -47,15 +46,15 @@ export function OptionButton({ letter, label, state, disabled, onClick }: Option
         transition={isCorrect ? { duration: 0.35, ease: "easeOut" } : { duration: 0.15 }}
         className={cn(
           "group relative flex w-full cursor-pointer items-center gap-3 rounded-2xl border-2 px-3.5 py-3.5 text-left",
-          "text-sm font-semibold tracking-tight sm:text-base",
+          "text-sm font-bold tracking-tight sm:text-base",
           "transition-all duration-150",
-          "enabled:active:translate-y-0.5 enabled:active:shadow-[1px_1px_0_0_#020617]",
-          "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600",
+          "enabled:active:translate-y-1 enabled:active:shadow-none",
+          "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900",
           "disabled:cursor-not-allowed",
           CARD[state],
         )}
       >
-        <kbd className={cn("shrink-0 rounded border px-2 py-1 font-mono text-xs leading-none font-medium", KEYCAP[state])}>
+        <kbd className={cn("shrink-0 rounded-md border-2 px-2 py-1 font-mono text-xs leading-none font-black", KEYCAP[state])}>
           {letter}
         </kbd>
         <span className="truncate">{label}</span>

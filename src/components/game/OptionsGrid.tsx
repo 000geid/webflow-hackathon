@@ -21,7 +21,7 @@ export function OptionsGrid({ choices, selectedChoiceId, correctChoiceId, locked
     <motion.div
       role="group"
       aria-label="Opciones de respuesta"
-      className="mt-4 grid grid-cols-2 gap-2.5 sm:gap-3"
+      className="mt-5 grid grid-cols-2 gap-3"
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 6 }}

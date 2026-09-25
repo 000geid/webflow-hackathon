@@ -6,12 +6,11 @@ import type { Choice } from "@/lib/game/types";
 import { ROUND_DURATION_MS, ROUNDS_PER_GAME } from "@/lib/game/rules";
 import { cn } from "@/lib/ui/cn";
 import { CardDeck } from "./CardDeck";
-import { GameHeader } from "./GameHeader";
+import { GameHud } from "./GameHud";
 import { GameImage } from "./GameImage";
 import { HintBox, HintButton } from "./HintPowerUp";
 import { GuessButton } from "./GuessButton";
 import { OptionsGrid } from "./OptionsGrid";
-import { PointsMeter } from "./PointsMeter";
 
 /**
  * Los nombres siguen a `GameView` (src/lib/game/types.ts) para que conectar
@@ -71,6 +70,13 @@ export interface GameStageProps {
 
 const TENSION_SECONDS = 3;
 
+/** Aciertos seguidos al final de la lista de resultados. */
+function trailingStreak(results: boolean[]): number {
+  let streak = 0;
+  for (let i = results.length - 1; i >= 0 && results[i]; i--) streak++;
+  return streak;
+}
+
 /** Pantalla principal del juego. Solo pinta lo que recibe por props. */
 export function GameStage({
   imageUrl,
@@ -121,16 +127,18 @@ export function GameStage({
         Solo:  escenario centrado.
         Multi: jugadores | escenario (lg), + actividad (xl).
       */}
-      <main className="min-h-screen overflow-x-clip px-4 py-5 sm:px-6 sm:py-8">
+      <main className="min-h-screen overflow-x-clip bg-cream bg-[radial-gradient(#E4DCCB_1px,transparent_1px)] [background-size:16px_16px] px-4 pt-5 pb-8 sm:px-6 sm:pt-8">
         <div className={cn("mx-auto w-full", hasPlayers ? "max-w-7xl" : "max-w-2xl")}>
-          <GameHeader
-            timeLeft={timeLeft}
+          <GameHud
             score={score}
-            roundIndex={roundIndex}
-            totalRounds={totalRounds}
-            results={results}
-            onExit={onExit}
+            streak={trailingStreak(results)}
+            timeLeft={timeLeft}
+            duration={duration}
+            isPaused={isPaused}
+            isRevealed={isRevealed}
+            earnedPoints={earnedPoints}
             tense={isTense}
+            onExit={onExit}
           />
 
           <div
@@ -143,43 +151,30 @@ export function GameStage({
             {hasPlayers && <div className="lg:sticky lg:top-6">{players}</div>}
 
             <section className="min-w-0">
-              <PointsMeter
-                timeLeft={timeLeft}
-                duration={duration}
-                isPaused={isPaused}
-                isRevealed={isRevealed}
-                earnedPoints={earnedPoints}
-                tense={isTense}
-              />
-
               {/* El temblor va en un wrapper: la carta ya usa transform para entrar y salir. */}
               <div className={cn(isTense && "motion-safe:animate-micro-shake")}>
-              <CardDeck cardKey={roundIndex} roundIndex={roundIndex} totalRounds={totalRounds} label={category} tense={isTense}>
-                <div className="relative">
-                  <GameImage
-                    src={imageUrl}
-                    alt={category ? `Imagen a adivinar: ${category}` : "Imagen a adivinar"}
-                    timeLeft={timeLeft}
-                    duration={duration}
-                    revealed={isRevealed}
-                  />
-                  {overlay}
-                </div>
-              </CardDeck>
+                <CardDeck
+                  cardKey={roundIndex}
+                  roundIndex={roundIndex}
+                  totalRounds={totalRounds}
+                  results={results}
+                  label={category}
+                  tense={isTense}
+                >
+                  <div className="relative">
+                    <GameImage
+                      src={imageUrl}
+                      alt={category ? `Imagen a adivinar: ${category}` : "Imagen a adivinar"}
+                      timeLeft={timeLeft}
+                      duration={duration}
+                      revealed={isRevealed}
+                    />
+                    {overlay}
+                  </div>
+                </CardDeck>
               </div>
 
-              {onFetchAIHint && (
-                <HintButton hintsLeft={hintsLeft} disabled={hintPending || isLocked || isRevealed} onClick={() => void requestHint()} />
-              )}
               <AnimatePresence>{hint && <HintBox key={hint} text={hint} />}</AnimatePresence>
-
-              <GuessButton
-                isPaused={isPaused}
-                disabled={isLocked}
-                canResume={canResume}
-                onGuess={onGuess}
-                onResume={onResume}
-              />
 
               <AnimatePresence>
                 {showOptions && choices.length > 0 && (
@@ -193,6 +188,21 @@ export function GameStage({
                   />
                 )}
               </AnimatePresence>
+
+              {/* Barra flotante: queda pegada abajo cuando la pantalla no alcanza. */}
+              <div className="sticky bottom-4 z-30 mt-5 flex items-center gap-2.5 rounded-full border-2 border-slate-900 bg-paper/95 p-2 shadow-[4px_4px_0px_0px_#0F172A] backdrop-blur-sm">
+                {onFetchAIHint && (
+                  <HintButton hintsLeft={hintsLeft} disabled={hintPending || isLocked || isRevealed} onClick={() => void requestHint()} />
+                )}
+                <GuessButton
+                  isPaused={isPaused}
+                  disabled={isLocked}
+                  canResume={canResume}
+                  onGuess={onGuess}
+                  onResume={onResume}
+                  className="min-w-0 flex-1"
+                />
+              </div>
             </section>
 
             {hasFeed && <aside className="hidden space-y-4 xl:sticky xl:top-6 xl:block">{feed}</aside>}
