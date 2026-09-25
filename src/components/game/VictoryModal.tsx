@@ -5,6 +5,7 @@ import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring, u
 import { CountUp } from "@/components/ui/CountUp";
 import { PillButton } from "@/components/ui/PillButton";
 import type { RoundHistory } from "@/lib/game/hints";
+import { avatarImageFor } from "@/lib/ui/avatar-images";
 import { copyText } from "@/lib/ui/clipboard";
 import { cn } from "@/lib/ui/cn";
 import { formatSeconds, victoryStats, victoryTitle, type VictoryTitle } from "@/lib/ui/victory";
@@ -32,38 +33,12 @@ export interface VictoryModalProps {
 const WATERFALL_ACCURACY = 60;
 const CONFETTI_COLORS = ["#10b981", "#06b6d4", "#9333ea", "#f59e0b", "#f3efe6"];
 
-/* Color del marco del avatar según la rareza del título. */
-const RARITY_FRAME: Record<VictoryTitle["rarity"], string> = {
-  Legendaria: "border-arcade shadow-[0_0_24px_rgb(245_158_11/0.65)]",
-  Épica: "border-cyan-400 shadow-[0_0_24px_rgb(34_211_238/0.6)]",
-  Rara: "border-purple-400 shadow-[0_0_24px_rgb(192_132_252/0.6)]",
-  Común: "border-slate-400 shadow-[0_0_18px_rgb(148_163_184/0.35)]",
-};
 const RARITY_CHIP: Record<VictoryTitle["rarity"], string> = {
   Legendaria: "bg-arcade text-black",
   Épica: "bg-cyan-400 text-black",
   Rara: "bg-purple-400 text-black",
   Común: "bg-slate-400 text-black",
 };
-
-/**
- * Insignia 8-bit: marco cuadrado con brillo neón y esquinas "mordidas" de a un píxel,
- * con el avatar del jugador adentro.
- */
-function PixelBadge({ avatar, rarity }: { avatar: string; rarity: VictoryTitle["rarity"] }) {
-  return (
-    <div className="relative mx-auto h-24 w-24">
-      <div className={cn("grid h-full w-full place-items-center border-4 bg-panel text-5xl", RARITY_FRAME[rarity])}>
-        <span aria-hidden="true">{avatar}</span>
-      </div>
-      {/* Esquinas pixeladas */}
-      {/* Cada esquina "muerde" el borde de 4px: da el escalón típico de los sprites 8-bit. */}
-      {["top-0 left-0", "top-0 right-0", "bottom-0 left-0", "bottom-0 right-0"].map((corner) => (
-        <span key={corner} aria-hidden="true" className={cn("absolute h-1 w-1 bg-crt", corner)} />
-      ))}
-    </div>
-  );
-}
 
 /** Lluvia continua de confetti mientras la tarjeta está abierta. Devuelve la función para cortarla. */
 function startWaterfall(): () => void {
@@ -93,6 +68,23 @@ function startWaterfall(): () => void {
     window.clearInterval(timer);
     reset?.();
   };
+}
+
+/** Avatar pixel-art del jugador (elegido por su nombre) en marco retro ámbar. */
+function AvatarImage({ name, size }: { name: string; size: "md" | "sm" }) {
+  return (
+    // Imágenes locales chicas de /public: no hace falta la optimización de next/image.
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={avatarImageFor(name)}
+      alt=""
+      draggable={false}
+      className={cn(
+        "shrink-0 rounded-none border-2 border-amber-400 object-cover shadow-[2px_2px_0px_#000]",
+        size === "md" ? "h-12 w-12" : "h-7 w-7",
+      )}
+    />
+  );
 }
 
 /** Tarjeta-trofeo 8-bit de fin de partida: insignia, título, dos métricas y acciones para compartir. */
@@ -169,11 +161,15 @@ export function VictoryModal({
                       <span className={cn("px-2 py-1 font-pixel text-[9px] tracking-widest uppercase", RARITY_CHIP[title.rarity])}>{title.rarity}</span>
                     </div>
 
-                    <PixelBadge avatar={player.avatar} rarity={title.rarity} />
-                    <p className="mt-4 truncate text-base font-bold text-cream">{player.name || "Jugador"}</p>
-                    <p className="mt-0.5 font-pixel text-[10px] tracking-wider text-slate-500 uppercase">
-                      {place ? `Puesto ${place} de ${ranking!.length}` : "Partida solo"}
-                    </p>
+                    <div className="mt-2 flex items-center justify-center gap-3">
+                      <AvatarImage name={player.name} size="md" />
+                      <div className="min-w-0 text-left">
+                        <p className="truncate text-base font-bold text-cream">{player.name || "Jugador"}</p>
+                        <p className="mt-0.5 font-pixel text-[10px] tracking-wider text-slate-500 uppercase">
+                          {place ? `Puesto ${place} de ${ranking!.length}` : "Partida solo"}
+                        </p>
+                      </div>
+                    </div>
 
                     <h2 id="victory-title" className="mt-4 font-pixel text-2xl leading-tight font-black text-amber-300 uppercase [text-shadow:0_0_18px_rgb(252_211_77/0.65)]">
                       {title.title}
@@ -207,7 +203,7 @@ export function VictoryModal({
                             <span className={cn("w-6 font-pixel text-[11px]", index === 0 ? "text-arcade" : "text-slate-500")} aria-label={`Puesto ${index + 1}`}>
                               {index + 1}º
                             </span>
-                            <span className="text-base" aria-hidden="true">{entry.avatar}</span>
+                            <AvatarImage name={entry.name} size="sm" />
                             <span className="min-w-0 flex-1 truncate text-sm font-semibold text-cream">{entry.name}</span>
                             <span className="font-pixel text-xs text-slate-300 tabular-nums">{entry.score}</span>
                           </li>
