@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" shape-rendering="crispEdges">
+  <!-- Mismo "píxel" 2×2 del logo (LogoMark en src/components/ui/TopCapsule.tsx). -->
+  <rect width="28" height="28" fill="#000"/>
+  <rect x="4" y="4" width="9" height="9" fill="#10b981"/>
+  <rect x="15" y="4" width="9" height="9" fill="#f59e0b"/>
+  <rect x="4" y="15" width="9" height="9" fill="#22d3ee"/>
+  <rect x="15" y="15" width="9" height="9" fill="#fb7185"/>
+</svg>

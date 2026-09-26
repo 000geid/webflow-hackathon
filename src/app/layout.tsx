@@ -5,8 +5,8 @@ import "@fontsource/silkscreen/700.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Pixel Rush AI — Mirá. Frená. Adiviná.",
-  description: "Cinco imágenes. Quince segundos. ¿Cuánto necesitás ver para adivinar?",
+  title: "Pixel Rush | ¿Qué ***** es esta imagen?",
+  description: "Frená el reloj antes que tus amigos y demostrá quién manda.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
