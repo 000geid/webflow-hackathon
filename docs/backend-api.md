@@ -81,7 +81,7 @@ Antes de desplegar: configurar el binding real de SQLite y aplicar la migración
 
 ## Categorías
 
-`GET /api/categories` devuelve cada categoría (`mix`, `pop-arg`, `cine-series`, `memes`, `deportes`, `tech`) con `count` de desafíos y `available` (hacen falta cinco). `POST /api/games` y `POST /api/rooms` aceptan `category` opcional (por defecto `mix`); si la categoría no tiene cinco desafíos responde `409 INSUFFICIENT_CHALLENGES`. La lista y los alias viven en `src/lib/game/categories.ts`. En modo `fixture` no se filtra: todas figuran disponibles con las formas de prueba.
+`GET /api/categories` devuelve cada categoría (`mix`, `tech`, `cine-series`, `memes`) con `count` de desafíos y `available` (hacen falta cinco). `POST /api/games` y `POST /api/rooms` aceptan `category` opcional (por defecto `mix`); si la categoría no tiene cinco desafíos responde `409 INSUFFICIENT_CHALLENGES`. La lista y los alias viven en `src/lib/game/categories.ts`. En modo `fixture` no se filtra: todas figuran disponibles con las formas de prueba.
 
 ## Puntaje
 

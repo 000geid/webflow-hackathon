@@ -17,16 +17,16 @@ test("ignore inactive, malformed, draft, archived and duplicate challenges", () 
 });
 
 test("CMS category text maps to canonical categories (accents, case, emoji, legacy labels)", async () => {
-  const { categoryOf } = await import("../src/lib/game/categories");
+  const { categoryInfo, categoryOf } = await import("../src/lib/game/categories");
+  assert.equal(categoryInfo("deportes" as never).id, "mix"); // id viejo guardado en una sala
   assert.equal(categoryOf("Memes y cultura dev"), "memes");
-  assert.equal(categoryOf("  FÚTBOL & deportes ⚽ "), "deportes");
   assert.equal(categoryOf("Cine y Series"), "cine-series");
-  assert.equal(categoryOf("Cultura Pop Arg 🇦🇷"), "pop-arg");
   assert.equal(categoryOf("Tech"), "tech");
   assert.equal(categoryOf("Logos & Tech ⚡"), "tech");
-  assert.equal(categoryOf("Cultura Arg"), "pop-arg");
   assert.equal(categoryOf("Pelis y Series"), "cine-series");
   assert.equal(categoryOf("Memes de Internet"), "memes");
-  assert.equal(categoryOf("Fútbol"), "deportes");
+  // Categorías eliminadas: esos desafíos solo aparecen en la mezcla.
+  assert.equal(categoryOf("Cultura Arg"), null);
+  assert.equal(categoryOf("Fútbol"), null);
   assert.equal(categoryOf("Cocina"), null);
 });
