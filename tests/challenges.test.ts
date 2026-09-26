@@ -20,13 +20,14 @@ test("CMS category text maps to canonical categories (accents, case, emoji, lega
   const { categoryInfo, categoryOf } = await import("../src/lib/game/categories");
   assert.equal(categoryInfo("deportes" as never).id, "mix"); // id viejo guardado en una sala
   assert.equal(categoryOf("Memes y cultura dev"), "memes");
+  assert.equal(categoryOf("Memes Argentina"), "memes");
   assert.equal(categoryOf("Cine y Series"), "cine-series");
   assert.equal(categoryOf("Tech"), "tech");
   assert.equal(categoryOf("Logos & Tech ⚡"), "tech");
+  assert.equal(categoryOf("Logos tech"), "tech");
   assert.equal(categoryOf("Pelis y Series"), "cine-series");
   assert.equal(categoryOf("Memes de Internet"), "memes");
   // Categorías eliminadas: esos desafíos solo aparecen en la mezcla.
-  assert.equal(categoryOf("Cultura Arg"), null);
   assert.equal(categoryOf("Fútbol"), null);
   assert.equal(categoryOf("Cocina"), null);
 });

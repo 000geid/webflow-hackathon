@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "webflow-cli:cloud": {
+      "source": "webflow/webflow-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/webflow-skills/skills/webflow-cloud-command/SKILL.md",
+      "computedHash": "34b90b1fac0a64f2f80dd22618c7663d8ff9f575880ae60533c74a10fa158d0a"
+    }
+  }
+}
