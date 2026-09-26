@@ -1,0 +1,28 @@
+Name,Slug,Imagen,Categoría,Opción A,Opción B,Opción C,Opción D,Respuesta correcta,Activa
+Titanic,fotos-peli-titanic,1.jpg,Memes de Internet,Oppenheimer,Titanic,Marty Supreme,El Gran Gatsby,B,true
+The Monkey,fotos-peli-monkey,2.jpg,Memes de Internet,The Substance,Frankenstein,The Monkey,Fight Club,C,true
+Frankenstein,fotos-peli-frankenstein,3-frankenstein.jpg,Memes de Internet,Frankenstein,El Grinch,The Mask,My Neighbor Totoro,A,true
+Marty Supreme,fotos-peli-marty-supreme,4-marty-sup.jpg,Memes de Internet,Karate Kid,Marty Supreme,The Truman Show,Blade Runner 2049,B,true
+El Grinch,fotos-peli-grinch,5-grinch.jpg,Memes de Internet,E.T.,Barbie,Parasite,El Grinch,D,true
+The Mask,fotos-peli-the-mask,6-the-mask.jpg,Memes de Internet,The Mask,Robin Hood,Sex and the City,The Big Bang Theory,A,true
+El Gran Gatsby,fotos-peli-great-gatsby,7-great-gatsby.jpg,Memes de Internet,Oppenheimer,El Gran Gatsby,Blade Runner 2049,Matrix,B,true
+Robin Hood,fotos-peli-robin-hood,8-Robin-Hood.jpg,Memes de Internet,Karate Kid,E.T.,Robin Hood,Fight Club,C,true
+Karate Kid,fotos-peli-karate-kid,9-Karate_Kid.jpg,Memes de Internet,Marty Supreme,The Mask,Barbie,Karate Kid,D,true
+The Substance,fotos-peli-the-substance,10-The_Substance.jpg,Memes de Internet,The Substance,Fight Club,Parasite,Frankenstein,A,true
+La Familia Addams,fotos-peli-addams-family,11-Addams_Family.jpg,Memes de Internet,Sex and the City,La Familia Addams,The Office,Breaking Bad,B,true
+Parásitos,fotos-peli-parasite,12-Parasite.jpg,Memes de Internet,The Substance,Matrix,Parásitos,Frankenstein,C,true
+Across the Spider-Verse,fotos-serie-spider-verse,13-S-Across-The-Spider-Verse.jpg,Memes de Internet,My Neighbor Totoro,Across the Spider-Verse,The Monkey,E.T.,B,true
+Barbie,fotos-peli-barbie,14-Barbie.jpg,Memes de Internet,Oppenheimer,The Substance,Parasite,Barbie,D,true
+Oppenheimer,fotos-peli-oppenheimer,15-Oppenheimer.jpg,Memes de Internet,Barbie,El Gran Gatsby,Oppenheimer,Blade Runner 2049,C,true
+My Neighbor Totoro,fotos-serie-totoro,16-My-Neighbour-Totoro.jpg,Memes de Internet,Across the Spider-Verse,E.T.,My Neighbor Totoro,The Monkey,C,true
+Breaking Bad,fotos-serie-breaking-bad,17-breaking-bad.jpg,Memes de Internet,Breaking Bad,The Office,Sex and the City,Fight Club,A,true
+Matrix,fotos-peli-matrix,18-matrix.jpg,Memes de Internet,Parásitos,Matrix,Blade Runner 2049,The Substance,B,true
+The Truman Show,fotos-peli-truman-show,19-truman-show.jpg,Memes de Internet,The Truman Show,The Big Bang Theory,The Office,Robin Hood,A,true
+Fight Club,fotos-peli-fight-club,20-fight-club.jpg,Memes de Internet,The Substance,Parásitos,Breaking Bad,Fight Club,D,true
+E.T.,fotos-peli-et,21-et.jpg,Memes de Internet,E.T.,My Neighbor Totoro,The Monkey,El Grinch,A,true
+Volver al Futuro,fotos-peli-volver-futuro,22-volver-futuro.jpg,Memes de Internet,Blade Runner 2049,Volver al Futuro,E.T.,Marty Supreme,B,true
+Sex and the City,fotos-serie-sex-and-the-city,23-satc.jpg,Memes de Internet,The Office,La Familia Addams,Sex and the City,Breaking Bad,C,true
+The Office,fotos-serie-the-office,24-the-office.jpg,Memes de Internet,The Big Bang Theory,The Office,Sex and the City,Breaking Bad,B,true
+Blade Runner 2049,fotos-peli-blade-runner-2049,25-blade-runner-2049.jpg,Memes de Internet,Matrix,Blade Runner 2049,Volver al Futuro,Oppenheimer,B,true
+The Big Bang Theory,fotos-serie-big-bang-theory,26-big-bang-theory.jpg,Memes de Internet,The Office,Sex and the City,Breaking Bad,The Big Bang Theory,D,true
+Los Simpson,fotos-serie-simpsons,27-simpsons.jpg,Memes de Internet,My Neighbor Totoro,The Monkey,Los Simpson,Family Guy,C,true

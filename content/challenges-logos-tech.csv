@@ -1,0 +1,7 @@
+name,slug,imagen,categoria,opcion-a,opcion-b,opcion-c,opcion-d,respuesta-correcta,activa
+Linux,fotos-logo-linux,fotos/logos tech/10-linux.jpg,Logos tech,Ubuntu,Windows,Linux Mint,Linux,D,true
+GitHub,fotos-logo-github,fotos/logos tech/11-github.png,Logos tech,GitLab,GitHub,SourceForge,Codeberg,B,true
+MySQL,fotos-logo-mysql,fotos/logos tech/12-my-sql.png,Logos tech,PostgreSQL,MongoDB,MySQL,SQLite,C,true
+Python,fotos-logo-python,fotos/logos tech/13-phyton.jpg,Logos tech,Python,PHP,Ruby,JavaScript,A,true
+Android,fotos-logo-android,fotos/logos tech/14-android.jpg,Logos tech,iOS,Android,Windows Phone,KaiOS,B,true
+Apple,fotos-logo-apple,fotos/logos tech/15-apple.jpg,Logos tech,Samsung,Microsoft,Linux,Apple,D,true

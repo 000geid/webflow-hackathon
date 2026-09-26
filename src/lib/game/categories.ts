@@ -14,7 +14,7 @@ export const CATEGORIES = [
   {
     id: "memes", label: "Memes de Internet", emoji: "🤡",
     description: "Los clásicos que viste mil veces en el grupo.",
-    aliases: ["memes del internet", "memes", "memes y cultura dev", "memes argentina", "cultura arg"],
+    aliases: ["memes del internet", "internet memes", "memes", "memes y cultura dev", "memes argentina", "cultura arg"],
   },
   {
     id: "cine-series", label: "Pelis & Series", emoji: "🍿",
