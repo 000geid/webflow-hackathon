@@ -9,7 +9,7 @@ export const CATEGORIES = [
   {
     id: "tech", label: "Logos & Tech", emoji: "⚡",
     description: "Adiviná el logo: lenguajes, frameworks, apps y herramientas.",
-    aliases: ["logos y tech", "logos", "tech y geek", "tech", "geek", "cultura dev"],
+    aliases: ["logos tech", "logos y tech", "logos", "tech y geek", "tech", "geek", "cultura dev"],
   },
   {
     id: "cine-series", label: "Pelis & Series", emoji: "🍿",
@@ -19,7 +19,7 @@ export const CATEGORIES = [
   {
     id: "memes", label: "Memes de Internet", emoji: "🤡",
     description: "Los clásicos que viste mil veces en el grupo.",
-    aliases: ["memes del internet", "memes", "memes y cultura dev"],
+    aliases: ["memes del internet", "internet memes", "memes", "memes y cultura dev", "memes argentina", "cultura arg"],
   },
 ] as const;
 
