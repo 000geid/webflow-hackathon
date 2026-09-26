@@ -81,7 +81,7 @@ Antes de desplegar: configurar el binding real de SQLite y aplicar la migración
 
 ## Categorías
 
-`GET /api/categories` devuelve cada categoría (`mix`, `pop-arg`, `cine-series`, `memes`, `deportes`, `tech`) con `count` de desafíos y `available` (hacen falta cinco). `POST /api/games` y `POST /api/rooms` aceptan `category` opcional (por defecto `mix`); si la categoría no tiene cinco desafíos responde `409 INSUFFICIENT_CHALLENGES`. La lista y los alias viven en `src/lib/game/categories.ts`. En modo `fixture` no se filtra: todas figuran disponibles con las formas de prueba.
+`GET /api/categories` devuelve cada categoría (`mix`, `tech`, `cine-series`, `memes`) con `count` de desafíos y `available` (hacen falta cinco). `POST /api/games` y `POST /api/rooms` aceptan `category` opcional (por defecto `mix`); si la categoría no tiene cinco desafíos responde `409 INSUFFICIENT_CHALLENGES`. La lista y los alias viven en `src/lib/game/categories.ts`. En modo `fixture` no se filtra: todas figuran disponibles con las formas de prueba.
 
 ## Puntaje
 
@@ -103,7 +103,7 @@ De 2 a 5 jugadores juegan las mismas cinco rondas. **La primera persona que paus
 
 Línea de tiempo de cada ronda: `startsAt` → hasta 15 s acumulados de revelación, con pausas de hasta 5 s por intento → `endedAt` → 4 s de resultados → siguiente ronda. La ronda cierra al primer acierto, cuando todos intentaron o al agotarse el reloj. La primera arranca 3 s después de `start` (cuenta regresiva). Igual que en partidas solo, el tiempo avanza al consultar: cada request pone la sala al día. Las pausas simultáneas se resuelven con la versión de la fila en D1: la primera escritura válida gana y la otra recibe `409`.
 
-- `POST /api/rooms` con `{ "name": "Ana", "avatar": "🦊", "category": "memes" }` (`category` opcional) → `201`: `RoomView` + `token`. El avatar debe ser uno de `AVATARS` (`src/lib/game/avatars.ts`); el nombre, de 1 a 16 caracteres. Los códigos tienen 5 caracteres sin I, L, O, 0 ni 1.
+- `POST /api/rooms` con `{ "name": "Ana", "avatar": "avatar7", "category": "memes" }` (`category` opcional) → `201`: `RoomView` + `token`. El avatar debe ser uno de `AVATARS` (`src/lib/game/avatars.ts`); el nombre, de 1 a 16 caracteres. Los códigos tienen 5 caracteres sin I, L, O, 0 ni 1.
 - `POST /api/rooms/{code}/join` con el mismo cuerpo → `201`: `RoomView` + `token`. Solo en lobby y con lugar. Un nombre repetido recibe sufijo (`Ana 2`).
 - `GET /api/rooms/{code}` con `Authorization: Bearer {token}` → `RoomView`. La UI lo consulta cada ~1 s; también marca presencia (se persiste como mucho cada 4 s; sin consultas por 10 s, el jugador figura desconectado).
 - `POST /api/rooms/{code}/actions` con el Bearer token:

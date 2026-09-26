@@ -1,5 +1,6 @@
 import type { PlayerStatus, RoomPlayerView } from "@/lib/game/room";
 import { cn } from "@/lib/ui/cn";
+import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 
 const STATUS: Record<PlayerStatus, { label: string; chip: string }> = {
   waiting: { label: "Listo", chip: "border-edge text-slate-400" },
@@ -14,13 +15,12 @@ function Avatar({ player, size }: { player: RoomPlayerView; size: "sm" | "md" })
   return (
     <span
       className={cn(
-        "relative grid shrink-0 place-items-center border-2 bg-crt",
-        size === "md" ? "h-10 w-10 text-xl" : "h-7 w-7 text-base",
-        player.status === "guessing" ? "border-arcade shadow-[0_0_12px_rgb(245_158_11/0.55)]" : "border-edge",
+        "relative block shrink-0 border-2",
+        player.status === "guessing" ? "border-arcade shadow-[0_0_12px_rgb(245_158_11/0.55)]" : "border-amber-400/70",
       )}
       aria-hidden="true"
     >
-      {player.avatar}
+      <PlayerAvatar avatar={player.avatar} className={size === "md" ? "h-10 w-10 text-xl" : "h-7 w-7 text-base"} />
       <span className={cn("absolute -right-1 -bottom-1 h-2.5 w-2.5 border-2 border-crt", player.online ? "bg-neon" : "bg-slate-600")} />
     </span>
   );

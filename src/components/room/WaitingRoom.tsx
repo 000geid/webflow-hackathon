@@ -7,6 +7,7 @@ import { TopCapsule } from "@/components/ui/TopCapsule";
 import type { RoomPlayerView, RoomView } from "@/lib/game/room";
 import { copyText } from "@/lib/ui/clipboard";
 import { cn } from "@/lib/ui/cn";
+import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 
 interface WaitingRoomProps {
   view: RoomView;
@@ -55,8 +56,8 @@ function PlayerCard({ player }: { player: RoomPlayerView }) {
           Anfitrión
         </span>
       )}
-      <span className="relative grid h-16 w-16 place-items-center border-2 border-edge bg-crt text-4xl sm:h-20 sm:w-20 sm:text-5xl" aria-hidden="true">
-        {player.avatar}
+      <span className="relative block border-2 border-amber-400 shadow-[2px_2px_0px_#000]" aria-hidden="true">
+        <PlayerAvatar avatar={player.avatar} className="h-16 w-16 text-4xl sm:h-20 sm:w-20 sm:text-5xl" />
         <span className={cn("absolute -right-1 -bottom-1 h-3 w-3 border-2 border-panel", player.online ? "bg-neon" : "bg-slate-600")} />
       </span>
       <p className="w-full truncate text-base font-bold text-slate-100">

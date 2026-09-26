@@ -54,7 +54,7 @@ interface GameClientProps {
   category?: CategoryChoice;
 }
 
-export function GameClient({ onExit, onFinished, notify, player = { name: "", avatar: "🦊" }, category = "mix" }: GameClientProps = {}) {
+export function GameClient({ onExit, onFinished, notify, player = { name: "", avatar: "avatar1" }, category = "mix" }: GameClientProps = {}) {
   const [view, setView] = useState<GameView | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);

@@ -33,14 +33,14 @@ export async function roomRequest<T = RoomView>(path: string, options: { token?:
 /** Traduce un evento de la sala al aviso flotante. */
 export function eventToast(event: RoomEvent): Omit<Toast, "id"> {
   switch (event.kind) {
-    case "joined": return { icon: event.avatar, text: `${event.name} se unió a la sala`, tone: "info" };
-    case "left": return { icon: event.avatar, text: `${event.name} salió de la sala`, tone: "info" };
+    case "joined": return { icon: "", avatar: event.avatar, text: `${event.name} se unió a la sala`, tone: "info" };
+    case "left": return { icon: "", avatar: event.avatar, text: `${event.name} salió de la sala`, tone: "info" };
     case "ready": return { icon: "✓", text: `${event.name} está listo/a`, tone: "success" };
     case "started": return { icon: "▸", text: "¡Arranca la partida!", tone: "live" };
-    case "guessing": return { icon: event.avatar, text: `${event.name} está adivinando…`, tone: "live" };
+    case "guessing": return { icon: "", avatar: event.avatar, text: `${event.name} está adivinando…`, tone: "live" };
     case "hint": return { icon: "?", text: `${event.name} usó su pista`, tone: "info" };
     case "correct": return { icon: "✓", text: `¡${event.name} adivinó correctamente! +${event.points ?? 0}`, tone: "success" };
-    case "wrong": return { icon: event.avatar, text: `${event.name} falló`, tone: "danger" };
+    case "wrong": return { icon: "", avatar: event.avatar, text: `${event.name} falló`, tone: "danger" };
     case "rematch": return { icon: "↻", text: `${event.name} armó la revancha`, tone: "info" };
   }
 }

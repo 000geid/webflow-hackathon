@@ -12,14 +12,14 @@ export const CATEGORIES = [
     aliases: ["logos tech", "logos y tech", "logos", "tech y geek", "tech", "geek", "cultura dev"],
   },
   {
-    id: "memes", label: "Memes de Internet", emoji: "🤡",
-    description: "Los clásicos que viste mil veces en el grupo.",
-    aliases: ["memes del internet", "internet memes", "memes", "memes y cultura dev", "memes argentina", "cultura arg"],
-  },
-  {
     id: "cine-series", label: "Pelis & Series", emoji: "🍿",
     description: "Escenas, personajes y pósters de pelis y series.",
     aliases: ["pelis y series", "cine y series", "cine", "series", "peliculas"],
+  },
+  {
+    id: "memes", label: "Memes de Internet", emoji: "🤡",
+    description: "Los clásicos que viste mil veces en el grupo.",
+    aliases: ["memes del internet", "internet memes", "memes", "memes y cultura dev", "memes argentina", "cultura arg"],
   },
 ] as const;
 
@@ -43,8 +43,9 @@ export function categoryOf(raw: string): CategoryId | null {
   return null;
 }
 
+/** Datos de una categoría. Un id que ya no existe (salas viejas) se muestra como la mezcla. */
 export function categoryInfo(choice: CategoryChoice) {
-  return choice === "mix" ? MIX : CATEGORIES.find((category) => category.id === choice)!;
+  return CATEGORIES.find((category) => category.id === choice) ?? MIX;
 }
 
 export type CategoryAvailability = { id: CategoryChoice; label: string; emoji: string; count: number; available: boolean };

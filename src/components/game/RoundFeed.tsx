@@ -1,5 +1,6 @@
 import type { RoomEvent } from "@/lib/game/room";
 import { cn } from "@/lib/ui/cn";
+import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 
 const FEED_SIZE = 8;
 
@@ -40,7 +41,7 @@ export function RoundFeed({ events, youId }: { events: RoomEvent[]; youId: strin
           {recent.map((event) => (
             <li key={event.seq} className="flex items-center gap-2.5 py-2 text-sm">
               <span className={cn("h-2 w-2 shrink-0", DOT[event.kind])} aria-hidden="true" />
-              <span className="shrink-0 text-base leading-none" aria-hidden="true">{event.avatar}</span>
+              <PlayerAvatar avatar={event.avatar} className="h-5 w-5 border border-amber-400/60 text-sm" />
               <span className={cn("min-w-0 truncate", event.playerId === youId ? "text-slate-500" : "text-slate-200")}>
                 {TEXT[event.kind](event)}
               </span>

@@ -204,7 +204,7 @@ export function RoomClient({ code, token, onExit, notify, onFinished }: RoomClie
 
       <VictoryModal
         open={view.status === "finished"}
-        player={me ?? { name: "", avatar: "🦊" }}
+        player={me ?? { name: "", avatar: "avatar1" }}
         score={view.score}
         totalRounds={view.totalRounds}
         history={view.history}

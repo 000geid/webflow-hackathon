@@ -85,7 +85,8 @@ async function mutateRoom<T>(code: string, mutate: (state: RoomState, now: numbe
 async function roomCategory(code: string): Promise<CategoryChoice> {
   const db = await database();
   const row = await db.prepare("SELECT state_json FROM rooms WHERE code = ?").bind(code).first<{ state_json: string }>();
-  return row ? ((JSON.parse(row.state_json) as RoomState).category ?? "mix") : "mix";
+  // Una sala vieja puede tener una categoría que ya no existe: la revancha usa la mezcla.
+  return categoryChoiceSchema.catch("mix").parse(row ? (JSON.parse(row.state_json) as RoomState).category : undefined);
 }
 
 export async function joinRoom(code: string, profile: Profile): Promise<RoomView & { token: string }> {

@@ -3,9 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/ui/cn";
+import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 
 export type ToastTone = "live" | "success" | "danger" | "info";
-export type Toast = { id: string; icon: string; text: string; tone: ToastTone };
+/** `avatar`: si el aviso es de un jugador, se muestra su personaje en lugar del ícono. */
+export type Toast = { id: string; icon: string; avatar?: string; text: string; tone: ToastTone };
 
 const TOAST_MS = 2600;
 /** Si llegan muchos eventos juntos, se descartan los más viejos. */
@@ -58,9 +60,13 @@ export function LiveToast({ toast }: { toast: Toast | null }) {
               TONE_SHADOW[toast.tone],
             )}
           >
-            <span className="grid h-7 w-7 shrink-0 place-items-center bg-crt font-pixel text-sm text-slate-100" aria-hidden="true">
-              {toast.icon}
-            </span>
+            {toast.avatar ? (
+              <PlayerAvatar avatar={toast.avatar} className="h-7 w-7 border border-amber-400 text-base" />
+            ) : (
+              <span className="grid h-7 w-7 shrink-0 place-items-center bg-crt font-pixel text-sm text-slate-100" aria-hidden="true">
+                {toast.icon}
+              </span>
+            )}
             <span className="truncate">{toast.text}</span>
             {toast.tone === "live" && (
               <span className="relative ml-0.5 flex h-2 w-2 shrink-0" aria-hidden="true">

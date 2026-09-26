@@ -12,7 +12,7 @@ const content = (): RoundContent[] => Array.from({ length: 5 }, (_, i) => ({
   id: String(i), category: "test", imageUrl: `/test-${i}.svg`,
   choices: [{ id: "A", label: "Yes" }, { id: "B", label: "No" }], correctChoiceId: "A",
 }));
-const player = (id: string, name = id) => ({ id, name, avatar: "🦊", tokenHash: `hash-${id}` });
+const player = (id: string, name = id) => ({ id, name, avatar: "avatar1", tokenHash: `hash-${id}` });
 function room(): RoomState {
   const state = createRoomState("fixture", content(), player("host", "Ana"), 0);
   addPlayer(state, player("p2", "Diego"), 0);
